@@ -7,6 +7,7 @@ from utils.keyboards import *
 from utils.states import Form
 from database.database import add_user, get_user_data
 from handlers.callbacks_handlers import get_test_str
+from settings import ADMIN_ID
 
 router = Router()
 
@@ -63,3 +64,10 @@ async def handle_show_answers(message: types.Message):
     answers_str = get_test_str(test_answers)
 
     await message.answer(text=f"<b>вот ваши ответы:</b>\n\n{answers_str}")
+
+@router.message(Command("feedback"))
+async def handle_edit_test(message: types.Message, bot: Bot):
+    text = message.text.replace("/feedback", "")
+
+    if len(text) > 4:
+        await bot.send_message(chat_id=ADMIN_ID, text=text)
