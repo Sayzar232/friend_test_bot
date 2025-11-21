@@ -19,7 +19,7 @@ async def handle_start(message: types.Message, bot: Bot, command: CommandObject,
     if command and command.args:
         try:
             payload = decode_payload(command.args)
-            if True:
+            if payload != str(message.from_user.id):
                 user_data = await get_user_data(message.from_user.id)
                 users_cant_again = user_data.get("users_cant_again") or []
                 if not message.from_user.id in users_cant_again:
@@ -27,6 +27,8 @@ async def handle_start(message: types.Message, bot: Bot, command: CommandObject,
                     await state.update_data(test_id=int(payload))
                 else:
                     await message.answer("❌ Вы не можете пройти этот тест заново, так как уже проходили его")
+            else:
+                await message.answer("❌ Вы не можете пройти свой же тест")
         except:
             await message.answer("Неверная персональная ссылка.", reply_markup=menu_kb)
 

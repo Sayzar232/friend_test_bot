@@ -67,6 +67,11 @@ async def handle_friend_answers(callback: CallbackQuery, state: FSMContext, bot:
 
         friend_test = friend_data.get("test_answers")
 
+        if not friend_test:
+            await callback.message.answer("❌ Произошла ошибка: владелец этого теста еще не создал свои ответы. Попросите его создать тест, чтобы вы могли его пройти.")
+            await state.clear()
+            return
+
         num_right_answers = len([1 for ind, i in enumerate(friend_test) if i == test_answers[ind]])
         best_users_passed.update({callback.from_user.username: num_right_answers})
         other_test_users.update({friend_data.get("username"): num_right_answers})
