@@ -37,8 +37,8 @@ async def init_db():
 async def add_user(user_id, ref_link, full_name, username):
     async with pool.acquire() as connection:
         await connection.execute(
-            "INSERT INTO users (id, full_name, username, ref_link) VALUES ($1, $2, $3, $4) ON CONFLICT (id) DO NOTHING;",
-            user_id, full_name, username, ref_link
+            "INSERT INTO users (id, full_name, username, ref_link, other_test_passed) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (id) DO NOTHING;",
+            user_id, full_name, username, ref_link, 0
         )
         await connection.execute(
             "INSERT INTO tests (id, num_users_passed) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING;",

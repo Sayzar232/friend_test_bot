@@ -22,12 +22,16 @@ async def handle_start(message: types.Message, bot: Bot, command: CommandObject,
             payload = decode_payload(command.args)
             if payload != str(message.from_user.id):
                 user_data = await get_user_data(message.from_user.id)
+                friend_data = await get_user_data(int(payload))
                 users_cant_again = user_data.get("users_cant_again") or []
-                if not message.from_user.id in users_cant_again:
+                check_test_answers = True if friend_data.get("test_answers") else False
+                if message.from_user.id in users_cant_again:
+                    await message.answer("❌ Вы не можете пройти этот тест заново, так как уже проходили его")
+                elif not check_test_answers:
+                    await message.answer("❌ Этот пользователь еще не создал тест")
+                else:
                     await message.answer("Приветствую! Вы перешли по чужой персональной ссылке.", reply_markup=friend_kb)
                     await state.update_data(test_id=int(payload))
-                else:
-                    await message.answer("❌ Вы не можете пройти этот тест заново, так как уже проходили его")
             else:
                 await message.answer("❌ Вы не можете пройти свой же тест")
         except:
