@@ -4,6 +4,7 @@ from aiogram.enums import ParseMode
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from aiohttp import web
 import os
+import logging
 
 from settings import TOKEN, WEBHOOK_URL, WEBHOOK_PATH, WEBAPP_HOST, WEBAPP_PORT, WEBHOOK_SECRET
 from handlers.user_handlers import router as user_router
@@ -13,14 +14,21 @@ from handlers.message_handlers import router as states_router
 from admin.admin_handlers import router as admin_router
 from database.database import init_db, close_db
 
+logging.basicConfig(
+    level=logging.INFO
+)
+
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
 
 dp.include_routers(user_router, callbacks_router, states_router, admin_router, answers_callbacks_router)
 
 async def on_startup(bot: Bot):
-    await init_db()
-    await bot.set_webhook(f"{WEBHOOK_URL}{WEBHOOK_PATH}", secret_token=WEBHOOK_SECRET)
+    try:
+        await init_db()
+        await bot.set_webhook(f"{WEBHOOK_URL}{WEBHOOK_PATH}", secret_token=WEBHOOK_SECRET)
+    except:
+        print("ошибка при инициализации базы данных")
 
 async def on_shutdown(bot: Bot):
     await close_db()
