@@ -3,6 +3,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from aiohttp import web
+import os
 
 from settings import TOKEN, WEBHOOK_URL, WEBHOOK_PATH, WEBAPP_HOST, WEBAPP_PORT, WEBHOOK_SECRET
 from handlers.user_handlers import router as user_router
@@ -37,7 +38,8 @@ def main():
     )
     webhook_requests_handler.register(app, path=WEBHOOK_PATH)
     setup_application(app, dp, bot=bot)
-    web.run_app(app, host=WEBAPP_HOST, port=WEBAPP_PORT)
+    port = int(os.getenv("PORT", 8080))  # берем порт, который задаёт Cloud Run
+    web.run_app(app, host="0.0.0.0", port=port)
 
 if __name__ == "__main__":
     main()
