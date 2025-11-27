@@ -6,7 +6,7 @@ from aiohttp import web
 import os
 import logging
 
-from settings import TOKEN, WEBHOOK_URL, WEBHOOK_PATH, WEBAPP_HOST, WEBAPP_PORT, WEBHOOK_SECRET
+from settings import TOKEN, WEBHOOK_URL, WEBHOOK_PATH, WEBHOOK_SECRET
 from handlers.user_handlers import router as user_router
 from handlers.callbacks_handlers import router as callbacks_router
 from handlers.answers_callbacks_handlers import router as answers_callbacks_router
