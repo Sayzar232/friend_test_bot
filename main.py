@@ -26,7 +26,17 @@ dp.include_routers(user_router, callbacks_router, states_router, admin_router, a
 async def on_startup(bot: Bot):
     try:
         await init_db()
-        await bot.set_webhook(f"{WEBHOOK_URL}{WEBHOOK_PATH}", secret_token=WEBHOOK_SECRET)
+
+        info = await bot.get_webhook_info()
+
+        correct_url = f"{WEBHOOK_URL}{WEBHOOK_PATH}"
+
+        if info.url != correct_url:
+            await bot.set_webhook(url=correct_url, secret_token=WEBHOOK_SECRET)
+            logging.info("webhook installed")
+        else:
+            logging.info("webhook already set")
+
     except Exception as e:
         print(f"ошибка при инициализации базы данных: {e}")
 
