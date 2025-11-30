@@ -27,8 +27,8 @@ async def on_startup(bot: Bot):
     try:
         await init_db()
         await bot.set_webhook(f"{WEBHOOK_URL}{WEBHOOK_PATH}", secret_token=WEBHOOK_SECRET)
-    except:
-        print("ошибка при инициализации базы данных")
+    except Exception as e:
+        print(f"ошибка при инициализации базы данных: {e}")
 
 async def on_shutdown(bot: Bot):
     await close_db()
