@@ -41,7 +41,13 @@ async def handle_friend_answers(callback: CallbackQuery, state: FSMContext, bot:
             await state.set_state(Form.waiting_for_text_answer)
             await state.update_data(answer_num=int(answer_num) + 1)
 
-        await callback.message.edit_text(text=f"{int(answer_num) + 1}. {QUESTIONS[int(answer_num)]}", reply_markup=get_question_keyboard(int(answer_num) + 1))
+        await callback.message.edit_text(
+            text=(
+                f"<b>✏️ Вопрос {int(answer_num) + 1} из 15</b>\n\n"
+                f"{QUESTIONS[int(answer_num)]}"
+            ),
+            reply_markup=get_question_keyboard(int(answer_num) + 1)
+        )
 
     else:
         answers_str = get_test_str(test_answers) if test_answers else "Ошибка"
@@ -53,7 +59,10 @@ async def handle_friend_answers(callback: CallbackQuery, state: FSMContext, bot:
         user_data = await get_user_data(callback.from_user.id)
 
         if not friend_data or not user_data:
-            await callback.message.answer("Произошла ошибка при получении данных. Попробуйте позже.")
+            await callback.message.answer(
+                "⚠️ <b>Произошла ошибка при получении данных.</b>\n\n"
+                "Попробуйте позже. Если проблема повторяется — напишите нам через команду <code>/feedback</code> 🛠"
+            )
             await state.clear()
             return
 
@@ -68,7 +77,10 @@ async def handle_friend_answers(callback: CallbackQuery, state: FSMContext, bot:
         friend_test = friend_data.get("test_answers")
 
         if not friend_test:
-            await callback.message.answer("❌ Произошла ошибка: владелец этого теста еще не создал свои ответы. Попросите его создать тест, чтобы вы могли его пройти.")
+            await callback.message.answer(
+                "❌ <b>Владелец этого теста ещё не создал свои ответы.</b>\n\n"
+                "Попросите его сначала пройти собственный тест, чтобы результаты были корректными, а затем попробуйте снова 🙂"
+            )
             await state.clear()
             return
 
@@ -77,8 +89,18 @@ async def handle_friend_answers(callback: CallbackQuery, state: FSMContext, bot:
         other_test_users.update({friend_data.get("username"): num_right_answers})
         users_cant_again.append(callback.from_user.id)
 
-        await callback.message.answer(f"<b>вы закончили тест, правильных ответов {num_right_answers}/15\nвот ваши ответы:</b>\n\n" + answers_str)
-        await bot.send_message(friend_id, f"<b>Ваш друг @{callback.from_user.username} прошел ваш тест!</b>\nПравильных ответов <b>{num_right_answers}/15</b>\n{f"Хотите пройти его тест: {ref_link}" if user_test_answers else ""}")
+        await callback.message.answer(
+            "<b>✅ Ты закончил(а) тест!</b>\n\n"
+            f"Правильных ответов: <b>{num_right_answers}/15</b> 🎯\n\n"
+            "<b>Вот твои ответы:</b>\n\n"
+            f"{answers_str}"
+        )
+        await bot.send_message(
+            friend_id,
+            "<b>👥 Кто-то прошёл твой тест!</b>\n\n"
+            f"Твой друг @{callback.from_user.username} набрал(а) <b>{num_right_answers}/15</b> правильных ответов 🙌\n"
+            f"{f'🔗 Хочешь пройти его(её) тест: {ref_link}' if user_test_answers else ''}"
+        )
         await state.clear()
 
         await update_after_test_completion(
@@ -116,7 +138,13 @@ async def handle_create_answers(callback: CallbackQuery, state: FSMContext):
             await state.set_state(Form.waiting_for_text_answer)
             await state.update_data(answer_num=int(answer_num) + 1)
 
-        await callback.message.edit_text(text=f"{int(answer_num) + 1}. {QUESTIONS[int(answer_num)]}", reply_markup=get_question_keyboard(int(answer_num) + 1))
+        await callback.message.edit_text(
+            text=(
+                f"<b>✏️ Вопрос {int(answer_num) + 1} из 15</b>\n\n"
+                f"{QUESTIONS[int(answer_num)]}"
+            ),
+            reply_markup=get_question_keyboard(int(answer_num) + 1)
+        )
 
     else:
         answers_str = ""
@@ -124,7 +152,12 @@ async def handle_create_answers(callback: CallbackQuery, state: FSMContext):
             answers_str += f"<b>{i + 1}. {QUESTIONS[i]}</b>\n{test_answers[i]}\n"
 
         await callback.message.delete()
-        await callback.message.answer("<b>вы закончили тест, вот ваши ответы:</b>\n\n" + answers_str, reply_markup=accept_test_kb)
+        await callback.message.answer(
+            "<b>✅ Ты заполнил(а) все ответы!</b>\n\n"
+            "<b>Вот как выглядит твой тест:</b>\n\n"
+            f"{answers_str}",
+            reply_markup=accept_test_kb
+        )
 
         return
 
@@ -139,9 +172,15 @@ async def handle_callbacks_accept_test(callback: CallbackQuery, state: FSMContex
     if data == "accept":
         await update_user_data(callback.from_user.id, test_answers, "tests", "test_answers")
         await update_user_data(callback.from_user.id, [], "tests", "users_cant_again")
-        await callback.message.answer("Тест принят")
+        await callback.message.answer(
+            "✅ <b>Тест сохранён!</b>\n\n"
+            "Теперь можешь отправлять ссылку друзьям и смотреть, насколько хорошо они тебя знают 🤝"
+        )
     else:
-        await callback.message.answer("Вы отменили изменение теста")
+        await callback.message.answer(
+            "❌ <b>Изменение теста отменено.</b>\n\n"
+            "Ты всегда можешь вернуться и создать или изменить тест позже 🙂"
+        )
 
     await callback.message.delete()
     await state.clear()

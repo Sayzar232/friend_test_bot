@@ -5,7 +5,6 @@ from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_applicati
 from aiohttp import web
 import os
 import logging
-
 from settings import TOKEN, WEBHOOK_URL, WEBHOOK_PATH, WEBHOOK_SECRET
 from handlers.user_handlers import router as user_router
 from handlers.callbacks_handlers import router as callbacks_router
@@ -15,69 +14,40 @@ from admin.admin_handlers import router as admin_router
 from database.database import init_db, close_db
 
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO
 )
-logger = logging.getLogger(__name__)
 
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
 
 dp.include_routers(user_router, callbacks_router, states_router, admin_router, answers_callbacks_router)
 
-async def on_startup(app):
-    """Инициализация при запуске"""
+async def on_startup(bot: Bot):
     try:
         await init_db()
-        logger.info("База данных инициализирована")
-        
-        # Удаляем старый webhook перед установкой нового
-        await bot.delete_webhook(drop_pending_updates=True)
-        logger.info("Старый webhook удален")
-        
-        correct_url = f"{WEBHOOK_URL}{WEBHOOK_PATH}"
-        await bot.set_webhook(
-            url=correct_url,
-            secret_token=WEBHOOK_SECRET,
-            drop_pending_updates=True
-        )
-        logger.info(f"Webhook установлен: {correct_url}")
-        
-        # Проверяем установку
+
         info = await bot.get_webhook_info()
-        logger.info(f"Webhook info: {info}")
-        
-    except Exception as e:
-        logger.error(f"Ошибка при инициализации: {e}", exc_info=True)
-        raise
 
-async def on_shutdown(app):
-    """Очистка при остановке"""
-    try:
-        await close_db()
-        logger.info("База данных закрыта")
-        # НЕ удаляем webhook при shutdown в Cloud Run!
-        # await bot.delete_webhook()
-    except Exception as e:
-        logger.error(f"Ошибка при shutdown: {e}", exc_info=True)
+        correct_url = f"{WEBHOOK_URL}{WEBHOOK_PATH}"
 
-async def health_check(request):
-    """Health check endpoint для Cloud Run"""
-    return web.Response(text="OK", status=200)
+        if info.url != correct_url:
+            await bot.set_webhook(url=correct_url, secret_token=WEBHOOK_SECRET)
+            logging.info("webhook installed")
+        else:
+            logging.info("webhook already set")
+
+    except Exception as e:
+        print(f"ошибка при инициализации базы данных: {e}")
+
+async def on_shutdown(bot: Bot):
+    await close_db()
+    await bot.delete_webhook()
 
 def main():
-    # Создаем приложение
+    dp.startup.register(on_startup)
+    dp.shutdown.register(on_shutdown)
+
     app = web.Application()
-    
-    # КРИТИЧНО: добавляем health check endpoint
-    app.router.add_get("/", health_check)
-    app.router.add_get("/health", health_check)
-    
-    # Регистрируем startup/shutdown
-    app.on_startup.append(on_startup)
-    app.on_shutdown.append(on_shutdown)
-    
-    # Настраиваем webhook handler
     webhook_requests_handler = SimpleRequestHandler(
         dispatcher=dp,
         bot=bot,
@@ -85,12 +55,7 @@ def main():
     )
     webhook_requests_handler.register(app, path=WEBHOOK_PATH)
     setup_application(app, dp, bot=bot)
-    
-    # Получаем порт из переменной окружения
-    port = int(os.getenv("PORT", 8080))
-    logger.info(f"Запуск сервера на порту {port}")
-    
-    # Запускаем приложение
+    port = int(os.getenv("PORT", 8080))  # берем порт, который задаёт Cloud Run
     web.run_app(app, host="0.0.0.0", port=port)
 
 if __name__ == "__main__":

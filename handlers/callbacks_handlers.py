@@ -25,21 +25,25 @@ async def handle_menu(callback: CallbackQuery):
     data = callback.data.replace("menu_", "")
 
     if data == "create_test":
-        await callback.message.edit_text("сейчас тебе будут скидываться вопросы", reply_markup=start_quetions_kb)
+        await callback.message.edit_text(
+            "<b>✏️ Начинаем создание или изменение твоего теста!</b>\n\n"
+            "Я буду по очереди отправлять тебе вопросы. Отвечай так, как чувствуешь — потом посмотрим, насколько хорошо тебя знают друзья 😊",
+            reply_markup=start_quetions_kb
+        )
     elif data == "info":
         user_info = await get_user_data(callback.from_user.id)
         best_users = user_info.get("best_users_passed") or {}
         other_test_passed = user_info.get("other_test_users") or {}
 
         if not best_users:
-            best_results_str = "Пока никто не прошел ваш тест."
+            best_results_str = "Пока никто не прошёл твой тест. Отправь ссылку друзьям и смотри, кто справится лучше всех 🏆"
         else:
             sorted_users = sorted(best_users.items(), key=lambda item: item[1], reverse=True)
             results_list = [f"{i}. @{username} - <b>{score}/15</b>" for i, (username, score) in enumerate(sorted_users, 1)]
             best_results_str = '\n'.join(results_list)
 
         if not other_test_passed:
-            best_results_other_str = "Вы пока не проходили чужие тесты"
+            best_results_other_str = "Ты пока не проходил(а) чужие тесты. Попробуй пройти тесты друзей и сравнить результаты 😉"
         else:
             sorted_other_test_passed = sorted(other_test_passed.items(), key=lambda item: item[1], reverse=True)
             other_results_list = [f"{i}. @{username} - <b>{score}/15</b>" for i, (username, score) in enumerate(sorted_other_test_passed, 1)]
@@ -49,27 +53,29 @@ async def handle_menu(callback: CallbackQuery):
         percent_users = {i: (best_users[i] + other_test_passed[i]) / 30 * 100 for i in percent_users_set}
 
         if not percent_users:
-            percent_users_str = "Нет данных для расчета совместимости."
+            percent_users_str = "Пока нет данных для расчёта совместимости. Пройди тесты друзей и дай им пройти твой тест 💫"
         else:
             sorted_percent_users = sorted(percent_users.items(), key=lambda item: item[1], reverse=True)
             percent_list = [f"{i}. @{username} - <b>{round(percent, 1)}%</b>" for i, (username, percent) in enumerate(sorted_percent_users, 1)]
             percent_users_str = '\n'.join(percent_list)
 
-        await callback.message.answer(text=
-            f"<b>Профиль</b>\n\n"
-            f"<b>Имя:</b> {callback.from_user.full_name}\n"
-            f"<b>ID:</b> {callback.from_user.id}\n\n"
-            f"<b>Пройденных тестов:</b> {user_info.get("other_test_passed")}\n"
-            f"<b>Количество людей, которые прошли ваш тест:</b> {user_info.get("num_users_passed")}\n\n"
-            f"<b>Ваша ссылка на тест:</b> {user_info.get("ref_link")}\n\n"
-            f"<b>🏆 Ваши лучшие результаты:</b>\n\n"
-            f"{best_results_str}\n\n"
-            f"<b>🏆 Лучшие результаты ваших друзей:</b>\n\n"
-            f"{best_results_other_str}\n\n"
-            f"<b>🏆 Лучшая совместимость с друзьями:\n\n</b>"
-            f"{percent_users_str}",
+        await callback.message.answer(
+            text=(
+                "<b>👤 Твой профиль</b>\n\n"
+                f"<b>Имя:</b> {callback.from_user.full_name}\n"
+                f"<b>ID:</b> {callback.from_user.id}\n\n"
+                f"<b>📝 Пройденных тестов:</b> {user_info.get('other_test_passed')}\n"
+                f"<b>👥 Людей, которые прошли твой тест:</b> {user_info.get('num_users_passed')}\n\n"
+                f"<b>🔗 Твоя ссылка на тест:</b>\n{user_info.get('ref_link')}\n\n"
+                "<b>🏆 Лучшие результаты по твоему тесту:</b>\n\n"
+                f"{best_results_str}\n\n"
+                "<b>🏆 Твои лучшие результаты в тестах друзей:</b>\n\n"
+                f"{best_results_other_str}\n\n"
+                "<b>💞 Совместимость с друзьями:</b>\n\n"
+                f"{percent_users_str}"
+            ),
             reply_markup=best_users_passed_kb
-            )
+        )
     elif data == "help":
         help_text = (
             "<b>ℹ️ Как пользоваться ботом?</b>\n\n"
@@ -95,10 +101,13 @@ async def handle_show_users_passed(callback: CallbackQuery):
     test_answers = get_test_str(user_info.get("test_answers"))
 
     if not test_answers:
-        await callback.message.answer("Вы пока не ответили на вопросы теста")
+        await callback.message.answer(
+            "❌ <b>Ты ещё не создал(а) свои ответы на тест.</b>\n\n"
+            "Сначала создай или обнови тест через кнопку «Создать/изменить тест» или команду <code>/edit_test</code> ✏️"
+        )
         return
 
-    await callback.message.answer(f"<b>Ответы на тест: </b>\n\n{test_answers}")
+    await callback.message.answer(f"<b>📚 Твои ответы на тест:</b>\n\n{test_answers}")
 
 @router.callback_query(F.data.startswith("start_questions_"))
 async def handle_start_question(callback: CallbackQuery, state: FSMContext):
@@ -109,9 +118,17 @@ async def handle_start_question(callback: CallbackQuery, state: FSMContext):
     if data == "start":
         await state.update_data(test_answers=[i for i in range(15)], test_type="create")
         await state.set_state(Form.waiting_for_answer)
-        await callback.message.answer(QUESTIONS[0], reply_markup=get_question_keyboard(1))
+        await callback.message.answer(
+            "<b>✏️ Вопрос 1 из 15</b>\n\n"
+            f"{QUESTIONS[0]}",
+            reply_markup=get_question_keyboard(1)
+        )
     elif data == "back":
-        await callback.message.edit_text("Приветствую", reply_markup=menu_kb)
+        await callback.message.edit_text(
+            "<b>Главное меню</b>\n\n"
+            "Выбери, что хочешь сделать дальше 👇",
+            reply_markup=menu_kb
+        )
         return
 
 @router.callback_query(F.data.startswith("friend_questions_"))
@@ -123,10 +140,17 @@ async def handle_friend_question(callback: CallbackQuery, state: FSMContext):
     if data == "start":
         await state.update_data(test_answers=[i for i in range(15)], test_type="answer")
         await state.set_state(Form.waiting_for_friend_answer)
-        await callback.message.edit_text(QUESTIONS[0], reply_markup=get_question_keyboard(1))
+        await callback.message.edit_text(
+            "<b>✏️ Вопрос 1 из 15</b>\n\n"
+            f"{QUESTIONS[0]}",
+            reply_markup=get_question_keyboard(1)
+        )
 
     elif data == "cancel":
         await state.clear()
         await callback.message.delete()
-        await callback.message.answer("Вы отменили начало теста")
+        await callback.message.answer(
+            "❌ <b>Начало теста отменено.</b>\n\n"
+            "Ты всегда можешь вернуться и пройти тест позже 🙂"
+        )
         return

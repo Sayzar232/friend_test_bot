@@ -20,7 +20,13 @@ async def handle_user_answers(message: types.Message, state: FSMContext):
     else:
         await state.set_state(Form.waiting_for_answer if test_type == "create" else Form.waiting_for_friend_answer)
 
-    await message.answer(text=f"{int(answer_num) + 1}. {QUESTIONS[int(answer_num)]}", reply_markup=get_question_keyboard(int(answer_num) + 1))
+    await message.answer(
+        text=(
+            f"<b>✏️ Вопрос {int(answer_num) + 1} из 15</b>\n\n"
+            f"{QUESTIONS[int(answer_num)]}"
+        ),
+        reply_markup=get_question_keyboard(int(answer_num) + 1)
+    )
 
     test_answers[answer_num - 1] = message.text
     await state.update_data(test_answers=test_answers)
