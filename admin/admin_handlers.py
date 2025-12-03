@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
 from settings import ADMIN_ID
-from database.database import get_all_user_ids, get_user_count, get_total_tests_passed, get_first_hundred_users
+from database.database import get_all_user_ids, get_user_count, get_total_tests_passed, get_last_hundred_users
 from utils.keyboards import admin_kb
 from utils.states import Form
 
@@ -44,7 +44,7 @@ async def handle_admin_actions(callback: CallbackQuery, state: FSMContext):
             f"Пройденных тестов: {total_tests}"
         )
     elif data == "100_users":
-        users = await get_first_hundred_users()
+        users = await get_last_hundred_users()
 
         if users:
             users_str_lst = [f"<b>{ind + 1}.</b> @{i}\n" for ind, i in enumerate(users)]
