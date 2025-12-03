@@ -109,7 +109,9 @@ async def get_first_hundred_users():
     async with pool.acquire() as connection:
         users = await connection.fetchval("SELECT username FROM users;")
 
-        return users[-100: ] or None
+        if users:
+            return users[-100: ]
+        return None
 
 async def close_db():
     if pool:
