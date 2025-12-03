@@ -107,10 +107,11 @@ async def get_total_tests_passed():
 
 async def get_last_hundred_users():
     async with pool.acquire() as connection:
-        users = await connection.fetch("SELECT username FROM users;")
+        records = await connection.fetch("SELECT username FROM users;")
 
-        if users:
-            return users[-100: ]
+        if records:
+            usernames = [record['username'] for record in records]
+            return usernames[-100:]
         return []
 
 async def close_db():

@@ -50,7 +50,7 @@ async def handle_admin_actions(callback: CallbackQuery, state: FSMContext):
             users_str_lst = [f"<b>{ind + 1}.</b> @{i}\n" for ind, i in enumerate(users)]
             users_str = "\n".join(users_str_lst)
 
-            await callback.message.answer(f"<b>👥 Первые 100 пользователей:</b>\n\n{users_str}")
+            await callback.message.answer(f"<b>👥 Последние 100 пользователей:</b>\n\n{users_str}")
         else:
             await callback.message.answer("Произошла ошибка или пользователей нет в базе данных")
 
