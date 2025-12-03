@@ -52,7 +52,7 @@ async def handle_admin_actions(callback: CallbackQuery, state: FSMContext):
 
             await callback.message.answer(f"<b>👥 Первые 100 пользователей:</b>\n\n{users_str}")
         else:
-            await callback.message.answer(f"<b>👥 Первые 100 пользователей:</b>\n\n{users_str}")
+            await callback.message.answer("Произошла ошибка или пользователей нет в базе данных")
 
 @router.message(F.text, Form.waiting_for_broadcast_message)
 async def handle_broadcast_message(message: types.Message, bot: Bot, state: FSMContext):
