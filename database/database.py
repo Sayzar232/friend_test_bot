@@ -105,6 +105,12 @@ async def get_total_tests_passed():
         count = await connection.fetchval("SELECT SUM(num_users_passed) FROM tests;")
         return count or 0
 
+async def get_first_hundred_users():
+    async with pool.acquire() as connection:
+        users = await connection.fetchval("SELECT username FROM users;")
+
+        return users[-100: ] or None
+
 async def close_db():
     if pool:
         await pool.close()

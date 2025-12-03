@@ -156,7 +156,8 @@ answer_15 = InlineKeyboardMarkup(inline_keyboard=[
 
 admin_kb = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="📢 Рассылка", callback_data="admin_broadcast")],
-    [InlineKeyboardButton(text="📊 Статистика", callback_data="admin_stats")]
+    [InlineKeyboardButton(text="📊 Статистика", callback_data="admin_stats")],
+    [InlineKeyboardButton(text="👥 Последние 100 пользователей", callback_data="admin_100_users")]
 ])
 
 def get_question_keyboard(question_number: int) -> InlineKeyboardMarkup | None:

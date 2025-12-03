@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
 from settings import ADMIN_ID
-from database.database import get_all_user_ids, get_user_count, get_total_tests_passed
+from database.database import get_all_user_ids, get_user_count, get_total_tests_passed, get_first_hundred_users
 from utils.keyboards import admin_kb
 from utils.states import Form
 
@@ -43,6 +43,16 @@ async def handle_admin_actions(callback: CallbackQuery, state: FSMContext):
             f"Пользователей: {user_count}\n"
             f"Пройденных тестов: {total_tests}"
         )
+    elif data == "100_users":
+        users = await get_first_hundred_users()
+
+        if users:
+            users_str_lst = [f"<b>{ind + 1}.</b> @{i}\n" for ind, i in enumerate(users)]
+            users_str = "\n".join(users_str_lst)
+
+            await callback.message.answer(f"<b>👥 Первые 100 пользователей:</b>\n\n{users_str}")
+        else:
+            await callback.message.answer(f"<b>👥 Первые 100 пользователей:</b>\n\n{users_str}")
 
 @router.message(F.text, Form.waiting_for_broadcast_message)
 async def handle_broadcast_message(message: types.Message, bot: Bot, state: FSMContext):
