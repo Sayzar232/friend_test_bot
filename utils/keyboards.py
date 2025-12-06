@@ -78,17 +78,17 @@ answer_6 = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="🎾 Теннис", callback_data="answer_6_теннис")],
     [InlineKeyboardButton(text="🤸 Гимнастика", callback_data="answer_6_гимнастика")],
     [InlineKeyboardButton(text="🥊 Бокс", callback_data="answer_6_бокс")],
-    [InlineKeyboardButton(text="🥋 ММА", callback_data="answer_6_mma")],
+    [InlineKeyboardButton(text="🥋 ММА", callback_data="answer_6_мма")],
     [InlineKeyboardButton(text="🤼 Борьба", callback_data="answer_6_борьба")],
     [InlineKeyboardButton(text="🏸 Теннис", callback_data="answer_6_теннис")],
-    [InlineKeyboardButton(text="❌ Нет любимого", callback_data="answer_6_нет_любимого")],
+    [InlineKeyboardButton(text="❌ Нет любимого", callback_data="answer_6_нет любимого")],
     [InlineKeyboardButton(text="❓ Другое", callback_data="answer_6_другое")]
 ])
 
 answer_7 = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="✅ Да", callback_data="answer_7_да")],
     [InlineKeyboardButton(text="❌ Нет", callback_data="answer_7_нет")],
-    [InlineKeyboardButton(text="⏰ Раньше было", callback_data="answer_7_раньше_было")]
+    [InlineKeyboardButton(text="⏰ Раньше было", callback_data="answer_7_раньше было")]
 ])
 
 answer_8 = InlineKeyboardMarkup(inline_keyboard=[
@@ -100,16 +100,16 @@ answer_8 = InlineKeyboardMarkup(inline_keyboard=[
 answer_9 = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="🍵 Чай", callback_data="answer_9_чай")],
     [InlineKeyboardButton(text="☕ Кофе", callback_data="answer_9_кофе")],
-    [InlineKeyboardButton(text="🍵☕ И то и другое", callback_data="answer_9_и_то_и_другое")],
-    [InlineKeyboardButton(text="❌ Ни то ни другое", callback_data="answer_9_ни_то_ни_другое")]
+    [InlineKeyboardButton(text="🍵☕ И то и другое", callback_data="answer_9_и то и другое")],
+    [InlineKeyboardButton(text="❌ Ни то ни другое", callback_data="answer_9_ни то ни другое")]
 ])
 
 answer_10 = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="🌅 До 7 утра", callback_data="answer_10_до_7")],
-    [InlineKeyboardButton(text="🌄 7-9 утра", callback_data="answer_10_7_9")],
-    [InlineKeyboardButton(text="☀️ 9-11 утра", callback_data="answer_10_9_11")],
-    [InlineKeyboardButton(text="😴 Позже 11", callback_data="answer_10_позже_11")],
-    [InlineKeyboardButton(text="🔄 Нет режима", callback_data="answer_10_нет_режима")]
+    [InlineKeyboardButton(text="🌅 До 7 утра", callback_data="answer_10_до 7 утра")],
+    [InlineKeyboardButton(text="🌄 7-9 утра", callback_data="answer_10_7-9 утра")],
+    [InlineKeyboardButton(text="☀️ 9-11 утра", callback_data="answer_10_9-11 утра")],
+    [InlineKeyboardButton(text="😴 Позже 11", callback_data="answer_10_позже 11")],
+    [InlineKeyboardButton(text="🔄 Нет режима", callback_data="answer_10_нет режима")]
 ])
 
 answer_11 = None
@@ -151,7 +151,7 @@ answer_15 = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="3️⃣ 3", callback_data="answer_15_3")],
     [InlineKeyboardButton(text="4️⃣ 4", callback_data="answer_15_4")],
     [InlineKeyboardButton(text="5️⃣+ 5+", callback_data="answer_15_5+")],
-    [InlineKeyboardButton(text="❌ Нет лучших друзей", callback_data="answer_15_нет_лучших_друзей")]
+    [InlineKeyboardButton(text="❌ Нет лучших друзей", callback_data="answer_15_нет лучших друзей")]
 ])
 
 admin_kb = InlineKeyboardMarkup(inline_keyboard=[
