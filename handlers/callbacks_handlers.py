@@ -32,6 +32,15 @@ async def handle_menu(callback: CallbackQuery):
         )
     elif data == "info":
         user_info = await get_user_data(callback.from_user.id)
+        if not user_info:
+            user_info = {
+                'best_users_passed': {},
+                'other_test_users': {},
+                'test_answers': [],
+                'other_test_passed': 0,
+                'num_users_passed': 0,
+                'ref_link': ''
+            }
         best_users = user_info.get("best_users_passed") or {}
         other_test_passed = user_info.get("other_test_users") or {}
 
@@ -98,6 +107,8 @@ async def handle_show_users_passed(callback: CallbackQuery):
     await callback.answer()
 
     user_info = await get_user_data(callback.from_user.id)
+    if not user_info:
+        user_info = {'test_answers': []}
     test_answers = get_test_str(user_info.get("test_answers"))
 
     if not test_answers:

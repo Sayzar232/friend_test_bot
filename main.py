@@ -29,6 +29,9 @@ async def on_startup(app):
     """Инициализация при запуске"""
     try:
         await init_db()
+        import database.migrations as migrations
+        import database.database as db
+        await migrations.apply_migrations(db.pool)
         logger.info("База данных инициализирована")
         
         # Удаляем старый webhook перед установкой нового

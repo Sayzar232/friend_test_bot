@@ -45,43 +45,60 @@ asnwer_1 = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="❓ Другой", callback_data="answer_1_другой")]
 ])
 
-
 answer_2 = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="🥬 Вегетерианец", callback_data="answer_2_вегетерианец")],
-    [InlineKeyboardButton(text="🌱 Веган", callback_data="answer_2_веган")],
-    [InlineKeyboardButton(text="🥩 Мясоед", callback_data="answer_2_мясоед")],
-    [InlineKeyboardButton(text="❓ Другое", callback_data="answer_2_другое")]
+    [InlineKeyboardButton(text="🎵 TikTok", callback_data="answer_2_tiktok")],
+    [InlineKeyboardButton(text="📺 YouTube", callback_data="answer_2_youtube")],
+    [InlineKeyboardButton(text="✈️ Telegram", callback_data="answer_2_telegram")],
+    [InlineKeyboardButton(text="📷 Instagram", callback_data="answer_2_instagram")],
+    [InlineKeyboardButton(text="📌 Pinterest", callback_data="answer_2_pinterest")],
+    [InlineKeyboardButton(text="🌐 VK", callback_data="answer_2_vk")],
+    [InlineKeyboardButton(text="🐦 Twitter", callback_data="answer_2_twitter")],
+    [InlineKeyboardButton(text="❓ Другое", callback_data="answer_2_другое")],
 ])
 
-answer_3 = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="🎵 Поп", callback_data="answer_3_поп")],
-    [InlineKeyboardButton(text="🎸 Рок", callback_data="answer_3_рок")],
-    [InlineKeyboardButton(text="🎤 Хип-хоп", callback_data="answer_3_хип-хоп")],
-    [InlineKeyboardButton(text="🎼 Классика", callback_data="answer_3_классика")],
-    [InlineKeyboardButton(text="🎷 Джаз", callback_data="answer_3_джаз")],
-    [InlineKeyboardButton(text="🤘 Метал", callback_data="answer_3_метал")],
-    [InlineKeyboardButton(text="🎛️ Электроника", callback_data="answer_3_электроника")],
-    [InlineKeyboardButton(text="🎻 Фолк", callback_data="answer_3_фолк")],
-    [InlineKeyboardButton(text="❓ Другое", callback_data="answer_3_другое")]
-])
+answer_3 = None
+
+# answer_3 = InlineKeyboardMarkup(inline_keyboard=[
+#     [InlineKeyboardButton(text="🎵 Поп", callback_data="answer_3_поп")],
+#     [InlineKeyboardButton(text="🎸 Рок", callback_data="answer_3_рок")],
+#     [InlineKeyboardButton(text="🎤 Хип-хоп", callback_data="answer_3_хип-хоп")],
+#     [InlineKeyboardButton(text="🎼 Классика", callback_data="answer_3_классика")],
+#     [InlineKeyboardButton(text="🎷 Джаз", callback_data="answer_3_джаз")],
+#     [InlineKeyboardButton(text="🤘 Метал", callback_data="answer_3_метал")],
+#     [InlineKeyboardButton(text="🎛️ Электроника", callback_data="answer_3_электроника")],
+#     [InlineKeyboardButton(text="🎻 Фолк", callback_data="answer_3_фолк")],
+#     [InlineKeyboardButton(text="❓ Другое", callback_data="answer_3_другое")]
+# ])
 
 answer_4 = None
 
-answer_5 = None
+answer_5 = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="❄️ Январь", callback_data="answer_5_январь")],
+    [InlineKeyboardButton(text="❄️ Февраль", callback_data="answer_5_февраль")],
+    [InlineKeyboardButton(text="🌸 Март", callback_data="answer_5_март")],
+    [InlineKeyboardButton(text="🌸 Апрель", callback_data="answer_5_апрель")],
+    [InlineKeyboardButton(text="🌸 Май", callback_data="answer_5_май")],
+    [InlineKeyboardButton(text="☀️ Июнь", callback_data="answer_5_июнь")],
+    [InlineKeyboardButton(text="☀️ Июль", callback_data="answer_5_июль")],
+    [InlineKeyboardButton(text="☀️ Август", callback_data="answer_5_август")],
+    [InlineKeyboardButton(text="🍂 Сентябрь", callback_data="answer_5_сентябрь")],
+    [InlineKeyboardButton(text="🍂 Октябрь", callback_data="answer_5_октябрь")],
+    [InlineKeyboardButton(text="🍂 Ноябрь", callback_data="answer_5_ноябрь")],
+    [InlineKeyboardButton(text="❄️ Декабрь", callback_data="answer_5_декабрь")]
+])
 
 answer_6 = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="⚽ Футбол", callback_data="answer_6_футбол")],
-    [InlineKeyboardButton(text="🏀 Баскетбол", callback_data="answer_6_баскетбол")],
-    [InlineKeyboardButton(text="🏐 Волейбол", callback_data="answer_6_волейбол")],
-    [InlineKeyboardButton(text="🏊 Плавание", callback_data="answer_6_плавание")],
-    [InlineKeyboardButton(text="🏃 Бег", callback_data="answer_6_бег")],
-    [InlineKeyboardButton(text="🎾 Теннис", callback_data="answer_6_теннис")],
-    [InlineKeyboardButton(text="🤸 Гимнастика", callback_data="answer_6_гимнастика")],
-    [InlineKeyboardButton(text="🥊 Бокс", callback_data="answer_6_бокс")],
-    [InlineKeyboardButton(text="🥋 ММА", callback_data="answer_6_мма")],
-    [InlineKeyboardButton(text="🤼 Борьба", callback_data="answer_6_борьба")],
-    [InlineKeyboardButton(text="🏸 Теннис", callback_data="answer_6_теннис")],
-    [InlineKeyboardButton(text="❌ Нет любимого", callback_data="answer_6_нет любимого")],
+    [InlineKeyboardButton(text="🖥️ IT-сфера", callback_data="answer_6_it")],
+    [InlineKeyboardButton(text="🩺 Медицина", callback_data="answer_6_медицина")],
+    [InlineKeyboardButton(text="🎓 Образование", callback_data="answer_6_образование")],
+    [InlineKeyboardButton(text="🎨 Искусство/Творчество", callback_data="answer_6_искусство")],
+    [InlineKeyboardButton(text="📈 Бизнес/Финансы", callback_data="answer_6_бизнес")],
+    [InlineKeyboardButton(text="🛠️ Инженерия", callback_data="answer_6_инженерия")],
+    [InlineKeyboardButton(text="⚖️ Юриспруденция", callback_data="answer_6_юриспруденция")],
+    [InlineKeyboardButton(text="📢 Маркетинг/PR", callback_data="answer_6_маркетинг")],
+    [InlineKeyboardButton(text="🔬 Наука", callback_data="answer_6_наука")],
+    [InlineKeyboardButton(text="🤝 Сфера услуг", callback_data="answer_6_сфера услуг")],
+    [InlineKeyboardButton(text="🤔 Еще не решил(а)", callback_data="answer_6_не решил")],
     [InlineKeyboardButton(text="❓ Другое", callback_data="answer_6_другое")]
 ])
 
@@ -98,10 +115,9 @@ answer_8 = InlineKeyboardMarkup(inline_keyboard=[
 ])
 
 answer_9 = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="🍵 Чай", callback_data="answer_9_чай")],
-    [InlineKeyboardButton(text="☕ Кофе", callback_data="answer_9_кофе")],
-    [InlineKeyboardButton(text="🍵☕ И то и другое", callback_data="answer_9_и то и другое")],
-    [InlineKeyboardButton(text="❌ Ни то ни другое", callback_data="answer_9_ни то ни другое")]
+    [InlineKeyboardButton(text="✅ Да", callback_data="answer_9_да")],
+    [InlineKeyboardButton(text="❌ Нет", callback_data="answer_9_нет")],
+    [InlineKeyboardButton(text="💔 Раньше было", callback_data="answer_9_раньше было")],
 ])
 
 answer_10 = InlineKeyboardMarkup(inline_keyboard=[
@@ -146,12 +162,9 @@ answer_14 = InlineKeyboardMarkup(inline_keyboard=[
 ])
 
 answer_15 = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="1️⃣ 1", callback_data="answer_15_1")],
-    [InlineKeyboardButton(text="2️⃣ 2", callback_data="answer_15_2")],
-    [InlineKeyboardButton(text="3️⃣ 3", callback_data="answer_15_3")],
-    [InlineKeyboardButton(text="4️⃣ 4", callback_data="answer_15_4")],
-    [InlineKeyboardButton(text="5️⃣+ 5+", callback_data="answer_15_5+")],
-    [InlineKeyboardButton(text="❌ Нет лучших друзей", callback_data="answer_15_нет лучших друзей")]
+    [InlineKeyboardButton(text="🖥 ПК", callback_data="answer_15_пк")],
+    [InlineKeyboardButton(text="📱 Телефон", callback_data="answer_15_телефон")],
+    [InlineKeyboardButton(text="🎮 Консоль", callback_data="answer_15_консоль")],
 ])
 
 admin_kb = InlineKeyboardMarkup(inline_keyboard=[
@@ -166,14 +179,14 @@ def get_question_keyboard(question_number: int) -> InlineKeyboardMarkup | None:
         1: asnwer_1,
         2: answer_2,
         3: answer_3,
-        4: None,  # Год рождения - текстовый ввод
-        5: None,  # День рождения - текстовый ввод
+        4: answer_4,  # Год рождения - текстовый ввод
+        5: answer_5,  # День рождения - текстовый ввод
         6: answer_6,
         7: answer_7,
         8: answer_8,
         9: answer_9,
         10: answer_10,
-        11: None,  # Страна - текстовый ввод
+        11: answer_11,  # Страна - текстовый ввод
         12: answer_12,
         13: answer_13,
         14: answer_14,

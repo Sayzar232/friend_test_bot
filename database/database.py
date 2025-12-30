@@ -1,3 +1,7 @@
+#Добавить файл миграции и добавить дату регистрации пользователя в таблицу users
+#Добавить файл миграции и добавить дату регистрации пользователя в таблицу users
+#Добавить файл миграции и добавить дату регистрации пользователя в таблицу users
+
 import asyncpg
 from settings import DATABASE_URL
 import json
@@ -21,7 +25,8 @@ async def init_db():
             username TEXT,
             other_test_passed INT,
             other_test_users JSONB,
-            ref_link TEXT
+            ref_link TEXT,
+            registration_date DATE
         );
         """)
         await connection.execute("""
@@ -34,11 +39,11 @@ async def init_db():
         );
         """)
 
-async def add_user(user_id, ref_link, full_name, username):
+async def add_user(user_id, ref_link, full_name, username, date):
     async with pool.acquire() as connection:
         await connection.execute(
-            "INSERT INTO users (id, full_name, username, ref_link, other_test_passed) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (id) DO NOTHING;",
-            user_id, full_name, username, ref_link, 0
+            "INSERT INTO users (id, full_name, username, ref_link, other_test_passed, registration_date) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (id) DO NOTHING;",
+            user_id, full_name, username, ref_link, 0, date
         )
         await connection.execute(
             "INSERT INTO tests (id, num_users_passed) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING;",
@@ -75,19 +80,63 @@ async def get_user_data(user_id):
             """,
             user_id
         )
+        # Если запись не найдена — возвращаем словарь с дефолтными значениями
         if not record:
-            return None
+            return {
+                'full_name': None,
+                'username': None,
+                'ref_link': None,
+                'other_test_passed': 0,
+                'other_test_users': {},
+                'test_answers': [],
+                'num_users_passed': 0,
+                'best_users_passed': {},
+                'users_cant_again': []
+            }
 
         data = dict(record)
+
+        # Если поля приходят как строки JSON, преобразуем в объекты Python
         if data.get('test_answers'):
-            data['test_answers'] = json.loads(data['test_answers'])
+            if isinstance(data['test_answers'], (str, bytes)):
+                try:
+                    data['test_answers'] = json.loads(data['test_answers'])
+                except Exception:
+                    data['test_answers'] = []
+        else:
+            data['test_answers'] = []
+
         if data.get('best_users_passed'):
-            data['best_users_passed'] = json.loads(data['best_users_passed'])
+            if isinstance(data['best_users_passed'], (str, bytes)):
+                try:
+                    data['best_users_passed'] = json.loads(data['best_users_passed'])
+                except Exception:
+                    data['best_users_passed'] = {}
+        else:
+            data['best_users_passed'] = {}
+
         if data.get('other_test_users'):
-            data['other_test_users'] = json.loads(data['other_test_users'])
+            if isinstance(data['other_test_users'], (str, bytes)):
+                try:
+                    data['other_test_users'] = json.loads(data['other_test_users'])
+                except Exception:
+                    data['other_test_users'] = {}
+        else:
+            data['other_test_users'] = {}
+
         if data.get('users_cant_again'):
-            data['users_cant_again'] = json.loads(data['users_cant_again'])
-        
+            if isinstance(data['users_cant_again'], (str, bytes)):
+                try:
+                    data['users_cant_again'] = json.loads(data['users_cant_again'])
+                except Exception:
+                    data['users_cant_again'] = []
+        else:
+            data['users_cant_again'] = []
+
+        # Числов поля — приводим к безопасным значениям
+        data['other_test_passed'] = data.get('other_test_passed') or 0
+        data['num_users_passed'] = data.get('num_users_passed') or 0
+
         return data
 
 async def get_all_user_ids():

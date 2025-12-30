@@ -24,31 +24,36 @@ async def handle_friend_answers(callback: CallbackQuery, state: FSMContext, bot:
 
     state_data = await state.get_data()
     test_answers = state_data.get("test_answers")
-    data = callback.data.replace("answer_", "")
+    data = callback.data.replace("answer_", "")  # получаем "<num>_<value>"
+    parts = data.split("_", 1)
+    num_str = parts[0]
+    answer = parts[1] if len(parts) > 1 else ""
 
-    if data[1].isdigit():
-        answer_num = data[:2]
-        answer = data[3:]
-    else:
-        answer_num = data[0]
-        answer = data[2:]
+    try:
+        cur_num = int(num_str)
+    except ValueError:
+        await callback.answer("Неверный формат ответа.", show_alert=True)
+        return
 
-    test_answers[int(answer_num) - 1] = answer
-    await state.update_data(test_answers=test_answers)
+    # Записываем ответ
+    test_answers[cur_num - 1] = answer
+    next_num = cur_num + 1
 
-    if not int(answer_num) >= 15:
-        if not get_question_keyboard(int(answer_num) + 1):
+    # Всегда сохраняем текущее состояние (ответы и индекс)
+    await state.update_data(test_answers=test_answers, answer_num=next_num)
+
+    # Если есть следующий вопрос
+    if next_num <= 15:
+        kb = get_question_keyboard(next_num)
+        if kb is None:
             await state.set_state(Form.waiting_for_text_answer)
-            await state.update_data(answer_num=int(answer_num) + 1)
-
+        else:
+            # оставляем соответствующее состояние ожидания callback (friend/create)
+            await state.set_state(Form.waiting_for_friend_answer)  # или Form.waiting_for_answer в другом обработчике
         await callback.message.edit_text(
-            text=(
-                f"<b>✏️ Вопрос {int(answer_num) + 1} из 15</b>\n\n"
-                f"{QUESTIONS_FOR_FRIEND[int(answer_num)]}"
-            ),
-            reply_markup=get_question_keyboard(int(answer_num) + 1)
+            f"<b>✏️ Вопрос {next_num} из 15</b>\n\n{QUESTIONS_FOR_FRIEND[next_num-1]}",
+            reply_markup=kb
         )
-
     else:
         answers_str = get_test_str(test_answers) if test_answers else "Ошибка"
 
@@ -84,7 +89,7 @@ async def handle_friend_answers(callback: CallbackQuery, state: FSMContext, bot:
             await state.clear()
             return
 
-        num_right_answers = len([1 for ind, i in enumerate(friend_test) if i == test_answers[ind]])
+        num_right_answers = len([1 for ind, i in enumerate(friend_test) if i.lower() == test_answers[ind].lower()])
         best_users_passed.update({callback.from_user.username: num_right_answers})
         other_test_users.update({friend_data.get("username"): num_right_answers})
         users_cant_again.append(callback.from_user.id)
@@ -121,31 +126,36 @@ async def handle_create_answers(callback: CallbackQuery, state: FSMContext):
 
     state_data = await state.get_data()
     test_answers = state_data.get("test_answers")
-    data = callback.data.replace("answer_", "")
+    data = callback.data.replace("answer_", "")  # получаем "<num>_<value>"
+    parts = data.split("_", 1)
+    num_str = parts[0]
+    answer = parts[1] if len(parts) > 1 else ""
 
-    if data[1].isdigit():
-        answer_num = data[:2]
-        answer = data[3:]
-    else:
-        answer_num = data[0]
-        answer = data[2:]
+    try:
+        cur_num = int(num_str)
+    except ValueError:
+        await callback.answer("Неверный формат ответа.", show_alert=True)
+        return
 
-    test_answers[int(answer_num) - 1] = answer
-    await state.update_data(test_answers=test_answers)
+    # Записываем ответ
+    test_answers[cur_num - 1] = answer
+    next_num = cur_num + 1
 
-    if not int(answer_num) >= 15:
-        if not get_question_keyboard(int(answer_num) + 1):
+    # Всегда сохраняем текущее состояние (ответы и индекс)
+    await state.update_data(test_answers=test_answers, answer_num=next_num)
+
+    # Если есть следующий вопрос
+    if next_num <= 15:
+        kb = get_question_keyboard(next_num)
+        if kb is None:
             await state.set_state(Form.waiting_for_text_answer)
-            await state.update_data(answer_num=int(answer_num) + 1)
-
+        else:
+            # оставляем соответствующее состояние ожидания callback (friend/create)
+            await state.set_state(Form.waiting_for_friend_answer)  # или Form.waiting_for_answer в другом обработчике
         await callback.message.edit_text(
-            text=(
-                f"<b>✏️ Вопрос {int(answer_num) + 1} из 15</b>\n\n"
-                f"{QUESTIONS[int(answer_num)]}"
-            ),
-            reply_markup=get_question_keyboard(int(answer_num) + 1)
+            f"<b>✏️ Вопрос {next_num} из 15</b>\n\n{QUESTIONS_FOR_FRIEND[next_num-1]}",
+            reply_markup=kb
         )
-
     else:
         answers_str = ""
         for i in range(len(test_answers)):
