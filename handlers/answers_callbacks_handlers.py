@@ -151,7 +151,7 @@ async def handle_create_answers(callback: CallbackQuery, state: FSMContext):
             await state.set_state(Form.waiting_for_text_answer)
         else:
             # оставляем соответствующее состояние ожидания callback (friend/create)
-            await state.set_state(Form.waiting_for_friend_answer)  # или Form.waiting_for_answer в другом обработчике
+            await state.set_state(Form.waiting_for_answer)  # или Form.waiting_for_answer в другом обработчике
         await callback.message.edit_text(
             f"<b>✏️ Вопрос {next_num} из 15</b>\n\n{QUESTIONS_FOR_FRIEND[next_num-1]}",
             reply_markup=kb
