@@ -16,7 +16,7 @@ router = Router()
 @router.message(CommandStart())
 async def handle_start(message: types.Message, bot: Bot, command: CommandObject, state: FSMContext):
     link = await create_start_link(bot, str(message.from_user.id), encode=True)
-    date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    date = datetime.now().date()
 
     await message.answer(
         "<b>👋 Привет!</b>\n\n"
