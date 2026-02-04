@@ -90,7 +90,7 @@ def main():
     setup_application(app, dp, bot=bot)
     
     # Получаем порт из переменной окружения
-    port = int(os.getenv("PORT", 8080))
+    port = int(os.getenv("PORT", 10000))
     logger.info(f"Запуск сервера на порту {port}")
     
     # Запускаем приложение

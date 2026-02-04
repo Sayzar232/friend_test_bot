@@ -93,8 +93,8 @@ async def handle_profile(message: types.Message):
     await message.answer(
         text=(
             "<b>👤 Твой профиль</b>\n\n"
-            f"<b>Имя:</b> {message.from_user.full_name}\n"
-            f"<b>ID:</b> {message.from_user.id}\n\n"
+            f"<b>Имя:</b> <code>{message.from_user.full_name}</code>\n"
+            f"<b>ID:</b> <code>{message.from_user.id}</code>\n\n"
             f"<b>📝 Пройденных тестов:</b> {user_info.get('other_test_passed')}\n"
             f"<b>👥 Людей, которые прошли твой тест:</b> {user_info.get('num_users_passed')}\n\n"
             f"<b>🔗 Твоя ссылка на тест:</b>\n{user_info.get('ref_link')}\n\n"
