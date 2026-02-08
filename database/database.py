@@ -40,7 +40,7 @@ async def init_db():
         CREATE TABLE IF NOT EXISTS tests_answers (
             test_id BIGINT REFERENCES tests(id) ON DELETE CASCADE,
             question_index INT,
-            answer INT,
+            answer TEXT,
             PRIMARY KEY (test_id, question_index)
         );
         """)
@@ -74,39 +74,22 @@ async def add_user(user_id, ref_link, full_name, username, date):
                 user_id
             )
 
-async def update_user_data(user_id, data, table_name, column_name):
-    """
-    Универсальная функция обновления, адаптированная под новую схему.
-    Если обновляем answers (ответы теста), то переписываем таблицу tests_answers.
-    """
+async def update_after_test_creation(user_id, data):
     async with pool.acquire() as connection:
-        if column_name == 'test_answers':
-            # Перезаписываем ответы теста
-            # data должно быть списком правильных ответов (индексов), например [0, 2, 1, ...]
-            async with connection.transaction():
-                # Удаляем старые ответы
-                await connection.execute("DELETE FROM tests_answers WHERE test_id = $1", user_id)
-                
-                # Записываем новые
-                if data and isinstance(data, list):
-                    # Подготовим данные для bulk insert: [(test_id, index, answer), ...]
-                    insert_data = [(user_id, idx, ans) for idx, ans in enumerate(data)]
-                    await connection.executemany(
-                        "INSERT INTO tests_answers (test_id, question_index, answer) VALUES ($1, $2, $3)",
-                        insert_data
-                    )
-        
-        elif table_name == 'users':
-            # Обычное обновление поля в users (например, ref_link или full_name)
-            await connection.execute(
-                f"UPDATE users SET {column_name} = $1 WHERE id = $2;",
-                data, user_id
-            )
+        async with connection.transaction():
+            # Удаляем старые ответы
+            await connection.execute("DELETE FROM tests_answers WHERE test_id = $1", user_id)
             
-        # Для других специфичных случаев можно добавить условий,
-        # но основные сложные JSON-поля мы разнесли.
+            # Записываем новые
+            if data and isinstance(data, list):
+                # Подготовим данные для bulk insert: [(test_id, index, answer), ...]
+                insert_data = [(user_id, idx, ans) for idx, ans in enumerate(data)]
+                await connection.executemany(
+                    "INSERT INTO tests_answers (test_id, question_index, answer) VALUES ($1, $2, $3)",
+                    insert_data
+                )
 
-async def update_after_test_completion(friend_id, num_users_passed, best_users_passed, users_cant_again, user_id, other_test_passed, other_test_users):
+async def update_after_test_completion(test_id, num_users_passed, best_users_passed, users_cant_again, user_id, other_test_passed, other_test_users):
     """
     friend_id: ID владельца теста (чьи тест прошли)
     user_id: ID того кто прошел (текущий юзер)
@@ -130,14 +113,14 @@ async def update_after_test_completion(friend_id, num_users_passed, best_users_p
                 VALUES ($1, $2, $3)
                 ON CONFLICT (test_id, taker_id) DO UPDATE SET score = $3, passed_at = NOW();
                 """,
-                friend_id, user_id, current_score
+                test_id, user_id, current_score
             )
             
             # 2. Обновляем счетчики (каунтеры)
             # Обновляем num_users_passed в tests
             await connection.execute(
                 "UPDATE tests SET num_users_passed = $1 WHERE id = $2",
-                num_users_passed, friend_id
+                num_users_passed, test_id
             )
             
             # Обновляем other_test_passed у того кто прошел

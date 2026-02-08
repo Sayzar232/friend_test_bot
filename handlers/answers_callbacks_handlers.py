@@ -180,8 +180,7 @@ async def handle_callbacks_accept_test(callback: CallbackQuery, state: FSMContex
     test_answers = state_data.get("test_answers")
 
     if data == "accept":
-        await update_user_data(callback.from_user.id, test_answers, "tests", "test_answers")
-        await update_user_data(callback.from_user.id, [], "tests", "users_cant_again")
+        await update_after_test_creation(callback.from_user.id, test_answers)
         await callback.message.answer(
             "✅ <b>Тест сохранён!</b>\n\n"
             "Теперь можешь отправлять ссылку друзьям и смотреть, насколько хорошо они тебя знают 🤝"

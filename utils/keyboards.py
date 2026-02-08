@@ -29,6 +29,10 @@ accept_test_kb = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="Отменить", callback_data="accept_test_cancel")]
 ])
 
+send_link_kb = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="Отправить ссылку", switch_inline_query="")]
+])
+
 #Answers keyboards
 asnwer_1 = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="🔵 Голубой", callback_data="answer_1_голубой")],
