@@ -109,7 +109,7 @@ async def handle_friend_answers(callback: CallbackQuery, state: FSMContext, bot:
         await state.clear()
 
         await update_after_test_completion(
-            friend_id=friend_id,
+            test_id=friend_id,
             num_users_passed=num_users_passed + 1,
             best_users_passed=best_users_passed,
             users_cant_again=users_cant_again,
@@ -179,11 +179,15 @@ async def handle_callbacks_accept_test(callback: CallbackQuery, state: FSMContex
     state_data = await state.get_data()
     test_answers = state_data.get("test_answers")
 
+    user_data = await get_user_data(callback.from_user.id)
+    ref_link = user_data.get("ref_link")
+
     if data == "accept":
         await update_after_test_creation(callback.from_user.id, test_answers)
         await callback.message.answer(
             "✅ <b>Тест сохранён!</b>\n\n"
-            "Теперь можешь отправлять ссылку друзьям и смотреть, насколько хорошо они тебя знают 🤝"
+            "Теперь можешь отправлять ссылку друзьям и смотреть, насколько хорошо они тебя знают 🤝",
+            reply_markup=get_send_link_kb(ref_link)
         )
     else:
         await callback.message.answer(

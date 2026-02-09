@@ -3,7 +3,7 @@ from aiogram.fsm.context import FSMContext
 
 from utils.states import Form
 from utils.keyboards import *
-from utils.questions import QUESTIONS
+from utils.questions import QUESTIONS, QUESTIONS_FOR_FRIEND
 
 router = Router()
 
@@ -41,10 +41,12 @@ async def handle_user_answers(message: types.Message, state: FSMContext):
     else:
         await state.set_state(Form.waiting_for_answer if test_type == "create" else Form.waiting_for_friend_answer)
 
+    question = QUESTIONS[int(answer_num)] if test_type == "create" else QUESTIONS_FOR_FRIEND[int(answer_num)]
+
     await message.answer(
         text=(
             f"<b>✏️ Вопрос {int(answer_num) + 1} из 15</b>\n\n"
-            f"{QUESTIONS[int(answer_num)]}"
+            f"{question}"
         ),
         reply_markup=get_question_keyboard(int(answer_num) + 1)
     )

@@ -29,10 +29,6 @@ accept_test_kb = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="Отменить", callback_data="accept_test_cancel")]
 ])
 
-send_link_kb = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="Отправить ссылку", switch_inline_query="")]
-])
-
 #Answers keyboards
 asnwer_1 = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="🔵 Голубой", callback_data="answer_1_голубой")],
@@ -197,3 +193,11 @@ def get_question_keyboard(question_number: int) -> InlineKeyboardMarkup | None:
         15: answer_15,
     }
     return keyboards.get(question_number)
+
+
+def get_send_link_kb(link: str) -> InlineKeyboardMarkup:
+    """Клавиатура для отправки ссылки другу"""
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Поделиться тестом", switch_inline_query=link)],
+        [InlineKeyboardButton(text="Назад в меню", callback_data="menu_info")]
+    ])

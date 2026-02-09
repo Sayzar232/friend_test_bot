@@ -3,7 +3,7 @@ from aiogram.types import CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 from utils.states import Form
-from utils.questions import QUESTIONS
+from utils.questions import QUESTIONS, QUESTIONS_FOR_FRIEND
 from utils.keyboards import *
 from database.database import *
 
@@ -153,7 +153,7 @@ async def handle_friend_question(callback: CallbackQuery, state: FSMContext):
         await state.set_state(Form.waiting_for_friend_answer)
         await callback.message.edit_text(
             "<b>✏️ Вопрос 1 из 15</b>\n\n"
-            f"{QUESTIONS[0]}",
+            f"{QUESTIONS_FOR_FRIEND[0]}",
             reply_markup=get_question_keyboard(1)
         )
 
