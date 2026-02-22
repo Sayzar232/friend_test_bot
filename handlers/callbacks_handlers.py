@@ -1,4 +1,4 @@
-from aiogram import Router, F, Bot
+from aiogram import Router, F
 from aiogram.types import CallbackQuery
 from aiogram.fsm.context import FSMContext
 
@@ -8,6 +8,21 @@ from utils.keyboards import *
 from database.database import *
 
 router = Router()
+
+NEW_USER_PROMPT = (
+    "<b>👋 Привет!</b>\n\n"
+    "Чтобы пользоваться ботом, сначала создай свой тест.\n"
+    "Нажми кнопку «Начать тест» ниже."
+)
+
+
+async def ensure_user_has_test(callback: CallbackQuery) -> bool:
+    user_data = await get_user_data(callback.from_user.id)
+    if user_data.get("test_answers"):
+        return True
+    await callback.message.answer(NEW_USER_PROMPT, reply_markup=new_user_start_kb)
+    return False
+
 
 def get_test_str(test_answers):
     if test_answers:
@@ -31,6 +46,8 @@ async def handle_menu(callback: CallbackQuery):
             reply_markup=start_quetions_kb
         )
     elif data == "info":
+        if not await ensure_user_has_test(callback):
+            return
         user_info = await get_user_data(callback.from_user.id)
         if not user_info:
             user_info = {
@@ -86,6 +103,8 @@ async def handle_menu(callback: CallbackQuery):
             reply_markup=best_users_passed_kb
         )
     elif data == "help":
+        if not await ensure_user_has_test(callback):
+            return
         help_text = (
             "<b>ℹ️ Как пользоваться ботом?</b>\n\n"
             "Этот бот позволяет вам создать свой собственный тест и поделиться им с друзьями, чтобы узнать, насколько хорошо они вас знают!\n\n"
@@ -105,6 +124,9 @@ async def handle_menu(callback: CallbackQuery):
 @router.callback_query(F.data == "test_answers_show")
 async def handle_show_users_passed(callback: CallbackQuery):
     await callback.answer()
+
+    if not await ensure_user_has_test(callback):
+        return
 
     user_info = await get_user_data(callback.from_user.id)
     if not user_info:
@@ -135,6 +157,10 @@ async def handle_start_question(callback: CallbackQuery, state: FSMContext):
             reply_markup=get_question_keyboard(1)
         )
     elif data == "back":
+        user_data = await get_user_data(callback.from_user.id)
+        if not user_data.get("test_answers"):
+            await callback.message.edit_text(NEW_USER_PROMPT, reply_markup=new_user_start_kb)
+            return
         await callback.message.edit_text(
             "<b>Главное меню</b>\n\n"
             "Выбери, что хочешь сделать дальше 👇",
@@ -145,6 +171,9 @@ async def handle_start_question(callback: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data.startswith("friend_questions_"))
 async def handle_friend_question(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
+
+    if not await ensure_user_has_test(callback):
+        return
 
     data = callback.data.replace("friend_questions_", "")
 

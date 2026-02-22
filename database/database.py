@@ -89,7 +89,7 @@ async def update_after_test_creation(user_id, data):
                     insert_data
                 )
 
-async def update_after_test_completion(test_id, num_users_passed, best_users_passed, users_cant_again, user_id, other_test_passed, other_test_users):
+async def update_after_test_completion(test_id, num_users_passed, best_users_passed, users_cant_again, user_id, other_test_passed, other_test_users, score):
     """
     friend_id: ID владельца теста (чьи тест прошли)
     user_id: ID того кто прошел (текущий юзер)
@@ -98,12 +98,6 @@ async def update_after_test_completion(test_id, num_users_passed, best_users_pas
     # Но лучше, если вызывающий код просто передает score. 
     # Так как сигнатуру менять не просили кардинально, попробуем извлечь score для user_id из best_users_passed
     
-    current_score = 0
-    if isinstance(best_users_passed, dict):
-        # Ищем результат текущего пользователя
-        # best_users_passed обычно имеет формат {str(uid): score}
-        current_score = best_users_passed.get(str(user_id)) or best_users_passed.get(user_id) or 0
-        
     async with pool.acquire() as connection:
         async with connection.transaction():
             # 1. Записываем результат прохождения
@@ -113,7 +107,7 @@ async def update_after_test_completion(test_id, num_users_passed, best_users_pas
                 VALUES ($1, $2, $3)
                 ON CONFLICT (test_id, taker_id) DO UPDATE SET score = $3, passed_at = NOW();
                 """,
-                test_id, user_id, current_score
+                test_id, user_id, score
             )
             
             # 2. Обновляем счетчики (каунтеры)
@@ -183,10 +177,9 @@ async def get_user_data(user_id):
         users_cant_again = []
         
         for row in results_rows:
-            uid_str = str(row['taker_id'])
-            # best_users_passed: {uid: score} (или объект, тут как в старом коде было)
-            # Судя по коду выше, там просто json.loads, значит ожидается словарь/список
-            best_users_passed[uid_str] = row['score']
+            # Используем username в качестве ключа для отображения в профиле
+            uname = row.get('username') or str(row['taker_id'])
+            best_users_passed[uname] = row['score']
             users_cant_again.append(row['taker_id'])
             
         data['best_users_passed'] = best_users_passed
@@ -195,12 +188,18 @@ async def get_user_data(user_id):
         # 3. Получаем список тестов, которые прошел ЭТОТ пользователь (other_test_users)
         # "other_test_users": {test_owner_id: score}
         passed_tests_rows = await connection.fetch(
-            "SELECT test_id, score FROM tests_results WHERE taker_id = $1",
+            """
+            SELECT tr.test_id, tr.score, u.username
+            FROM tests_results tr
+            JOIN users u ON tr.test_id = u.id
+            WHERE tr.taker_id = $1
+            """,
             user_id
         )
         other_test_users = {}
         for row in passed_tests_rows:
-            other_test_users[str(row['test_id'])] = row['score']
+            owner_name = row.get('username') or str(row['test_id'])
+            other_test_users[owner_name] = row['score']
             
         data['other_test_users'] = other_test_users
 

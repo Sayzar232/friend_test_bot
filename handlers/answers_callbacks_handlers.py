@@ -1,11 +1,13 @@
 from aiogram import Router, F, Bot
 from aiogram.types import CallbackQuery
 from aiogram.fsm.context import FSMContext
+from aiogram.utils.deep_linking import create_start_link
 
 from utils.states import Form
 from utils.questions import QUESTIONS, QUESTIONS_FOR_FRIEND
 from utils.keyboards import *
 from database.database import *
+from datetime import datetime
 
 router = Router()
 
@@ -115,7 +117,8 @@ async def handle_friend_answers(callback: CallbackQuery, state: FSMContext, bot:
             users_cant_again=users_cant_again,
             user_id=callback.from_user.id,
             other_test_passed=other_test_passed + 1,
-            other_test_users=other_test_users
+            other_test_users=other_test_users,
+            score=num_right_answers
         )
 
         return
@@ -172,17 +175,17 @@ async def handle_create_answers(callback: CallbackQuery, state: FSMContext):
         return
 
 @router.callback_query(F.data.startswith("accept_test_"))
-async def handle_callbacks_accept_test(callback: CallbackQuery, state: FSMContext):
+async def handle_callbacks_accept_test(callback: CallbackQuery, state: FSMContext, bot: Bot):
     await callback.answer()
 
     data = callback.data.replace("accept_test_", "")
     state_data = await state.get_data()
     test_answers = state_data.get("test_answers")
 
-    user_data = await get_user_data(callback.from_user.id)
-    ref_link = user_data.get("ref_link")
-
     if data == "accept":
+        ref_link = await create_start_link(bot, str(callback.from_user.id), encode=True)
+        date = datetime.now().date()
+        await add_user(callback.from_user.id, ref_link, callback.from_user.full_name, callback.from_user.username, date)
         await update_after_test_creation(callback.from_user.id, test_answers)
         await callback.message.answer(
             "✅ <b>Тест сохранён!</b>\n\n"

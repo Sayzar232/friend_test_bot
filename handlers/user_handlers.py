@@ -1,22 +1,33 @@
-from aiogram import Router, types, F, Bot
+from aiogram import Router, types, Bot
 from aiogram.filters import Command, CommandStart, CommandObject
 from aiogram.utils.deep_linking import create_start_link, decode_payload
 from aiogram.fsm.context import FSMContext
 
 from utils.keyboards import *
-from utils.states import Form
-from database.database import add_user, get_user_data
+from database.database import get_user_data
 from handlers.callbacks_handlers import get_test_str
 from settings import ADMIN_ID
 
-from datetime import datetime
-
 router = Router()
+
+NEW_USER_PROMPT = (
+    "<b>👋 Привет!</b>\n\n"
+    "Чтобы пользоваться ботом, сначала создай свой тест.\n"
+    "Нажми кнопку «Начать тест» ниже."
+)
+
+
+async def prompt_create_test(message: types.Message):
+    await message.answer(NEW_USER_PROMPT, reply_markup=new_user_start_kb)
 
 @router.message(CommandStart())
 async def handle_start(message: types.Message, bot: Bot, command: CommandObject, state: FSMContext):
+    user_data = await get_user_data(message.from_user.id)
+    if not user_data.get("test_answers"):
+        await prompt_create_test(message)
+        return
+
     link = await create_start_link(bot, str(message.from_user.id), encode=True)
-    date = datetime.now().date()
 
     await message.answer(
         "<b>👋 Привет!</b>\n\n"
@@ -31,16 +42,9 @@ async def handle_start(message: types.Message, bot: Bot, command: CommandObject,
         try:
             payload = decode_payload(command.args)
             if payload != str(message.from_user.id):
-                user_data = await get_user_data(message.from_user.id)
                 friend_data = await get_user_data(int(payload))
 
                 # Защита на случай, если в БД ещё нет записи
-                if not user_data:
-                    user_data = {
-                        'users_cant_again': [],
-                        'test_answers': [],
-                        'other_test_passed': 0,
-                    }
                 if not friend_data:
                     friend_data = {'test_answers': []}
 
@@ -76,18 +80,12 @@ async def handle_start(message: types.Message, bot: Bot, command: CommandObject,
                 reply_markup=menu_kb
             )
 
-    await add_user(message.from_user.id, link, message.from_user.full_name, message.from_user.username, date)
-
 @router.message(Command("profile"))
 async def handle_profile(message: types.Message):
     user_info = await get_user_data(message.from_user.id)
-    if not user_info:
-        user_info = {
-            'other_test_passed': 0,
-            'num_users_passed': 0,
-            'ref_link': '',
-            'test_answers': []
-        }
+    if not user_info.get("test_answers"):
+        await prompt_create_test(message)
+        return
     answers_str = get_test_str(user_info.get("test_answers"))
 
     await message.answer(
@@ -115,8 +113,9 @@ async def handle_edit_test(message: types.Message):
 @router.message(Command("show_answers"))
 async def handle_show_answers(message: types.Message):
     user_data = await get_user_data(message.from_user.id)
-    if not user_data:
-        user_data = {'test_answers': []}
+    if not user_data.get("test_answers"):
+        await prompt_create_test(message)
+        return
     test_answers = user_data.get("test_answers")
     answers_str = get_test_str(test_answers)
 
@@ -129,6 +128,10 @@ async def handle_show_answers(message: types.Message):
 
 @router.message(Command("feedback"))
 async def handle_edit_test(message: types.Message, bot: Bot):
+    user_data = await get_user_data(message.from_user.id)
+    if not user_data.get("test_answers"):
+        await prompt_create_test(message)
+        return
     text = message.text.replace("/feedback", "")
 
     if len(text) > 10:
