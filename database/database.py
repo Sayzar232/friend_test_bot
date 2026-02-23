@@ -144,9 +144,11 @@ async def get_user_data(user_id):
                 'ref_link': None,
                 'other_test_passed': 0,
                 'other_test_users': {},
+                'other_test_users_meta': [],
                 'test_answers': [],
                 'num_users_passed': 0,
                 'best_users_passed': {},
+                'best_users_passed_meta': [],
                 'users_cant_again': []
             }
             
@@ -174,22 +176,31 @@ async def get_user_data(user_id):
         
         # Формируем структуру как раньше, чтобы не ломать frontend/bot logic
         best_users_passed = {}
+        best_users_passed_meta = []
         users_cant_again = []
         
         for row in results_rows:
             # Используем username в качестве ключа для отображения в профиле
-            uname = row.get('username') or str(row['taker_id'])
+            taker_id = row['taker_id']
+            uname = row.get('username') or str(taker_id)
             best_users_passed[uname] = row['score']
-            users_cant_again.append(row['taker_id'])
+            best_users_passed_meta.append({
+                'user_id': taker_id,
+                'username': row.get('username'),
+                'full_name': row.get('full_name'),
+                'score': row['score']
+            })
+            users_cant_again.append(taker_id)
             
         data['best_users_passed'] = best_users_passed
+        data['best_users_passed_meta'] = best_users_passed_meta
         data['users_cant_again'] = users_cant_again
         
         # 3. Получаем список тестов, которые прошел ЭТОТ пользователь (other_test_users)
         # "other_test_users": {test_owner_id: score}
         passed_tests_rows = await connection.fetch(
             """
-            SELECT tr.test_id, tr.score, u.username
+            SELECT tr.test_id, tr.score, u.username, u.full_name
             FROM tests_results tr
             JOIN users u ON tr.test_id = u.id
             WHERE tr.taker_id = $1
@@ -197,11 +208,20 @@ async def get_user_data(user_id):
             user_id
         )
         other_test_users = {}
+        other_test_users_meta = []
         for row in passed_tests_rows:
-            owner_name = row.get('username') or str(row['test_id'])
+            owner_id = row['test_id']
+            owner_name = row.get('username') or str(owner_id)
             other_test_users[owner_name] = row['score']
+            other_test_users_meta.append({
+                'user_id': owner_id,
+                'username': row.get('username'),
+                'full_name': row.get('full_name'),
+                'score': row['score']
+            })
             
         data['other_test_users'] = other_test_users
+        data['other_test_users_meta'] = other_test_users_meta
 
         # Гарантируем дефолтные значения
         data['other_test_passed'] = data.get('other_test_passed') or 0

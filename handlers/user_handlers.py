@@ -4,9 +4,10 @@ from aiogram.utils.deep_linking import create_start_link, decode_payload
 from aiogram.fsm.context import FSMContext
 
 from utils.keyboards import *
-from database.database import get_user_data
+from database.database import add_user, get_user_data
 from handlers.callbacks_handlers import get_test_str
 from settings import ADMIN_ID
+from datetime import datetime
 
 router = Router()
 
@@ -22,12 +23,14 @@ async def prompt_create_test(message: types.Message):
 
 @router.message(CommandStart())
 async def handle_start(message: types.Message, bot: Bot, command: CommandObject, state: FSMContext):
+    link = await create_start_link(bot, str(message.from_user.id), encode=True)
+    date = datetime.now().date()
+    await add_user(message.from_user.id, link, message.from_user.full_name, message.from_user.username, date)
+
     user_data = await get_user_data(message.from_user.id)
     if not user_data.get("test_answers"):
         await prompt_create_test(message)
         return
-
-    link = await create_start_link(bot, str(message.from_user.id), encode=True)
 
     await message.answer(
         "<b>👋 Привет!</b>\n\n"
@@ -52,19 +55,18 @@ async def handle_start(message: types.Message, bot: Bot, command: CommandObject,
                 check_test_answers = True if friend_data.get("test_answers") else False
                 if message.from_user.id in users_cant_again:
                     await message.answer(
-                        "❌ <b>Вы уже проходили этот тест.</b>\n\n"
-                        "Каждый пользователь может пройти тест друга только один раз, "
-                        "чтобы результаты оставались честными и точными 😉"
+                        "<b>🔄 Ты уже проходил этот тест.</b>\n\n"
+                        "Каждый пользователь может пройти тест один раз, чтобы результаты оставались честными 😊"
                     )
                 elif not check_test_answers:
                     await message.answer(
-                        "⚠️ <b>Этот пользователь еще не создал свой тест.</b>\n\n"
-                        "Попросите его сначала создать тест, а затем попробуйте снова 😊"
+                        "<b>⚠️ Этот пользователь ещё не создал свой тест.</b>\n\n"
+                        "Попросите его сначала заполнить тест, а потом попробуйте снова 🙂"
                     )
                 else:
                     await message.answer(
-                        "<b>🌟 Ты перешёл по персональной ссылке друга!</b>\n\n"
-                        "Сейчас ты сможешь пройти его тест и проверить, насколько хорошо ты его знаешь 😎",
+                        "<b>🌟 Ты перешёл по ссылке друга!</b>\n\n"
+                        "Сейчас можешь пройти его тест и проверить, насколько хорошо ты его знаешь 🧠",
                         reply_markup=friend_kb
                     )
                     await state.update_data(test_id=int(payload))
@@ -105,8 +107,8 @@ async def handle_profile(message: types.Message):
 @router.message(Command("edit_test"))
 async def handle_edit_test(message: types.Message):
     await message.answer(
-        "<b>✏️ Давай создадим или изменим твой тест!</b>\n\n"
-        "Сейчас я буду по очереди отправлять тебе вопросы. Отвечай честно — так друзьям будет интереснее проходить тест 😉",
+        "<b>✏️ Создавай или изменяй свой тест!</b>\n\n"
+        "Буду отправлять вопросы по одному. Отвечай честно — результаты будут интереснее 😊",
         reply_markup=start_quetions_kb
     )
 

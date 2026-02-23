@@ -97,9 +97,9 @@ async def handle_friend_answers(callback: CallbackQuery, state: FSMContext, bot:
         users_cant_again.append(callback.from_user.id)
 
         await callback.message.answer(
-            "<b>✅ Ты закончил(а) тест!</b>\n\n"
+            "<b>✅ Тест пройден!</b>\n\n"
             f"Правильных ответов: <b>{num_right_answers}/15</b> 🎯\n\n"
-            "<b>Вот твои ответы:</b>\n\n"
+            "<b>Твои ответы:</b>\n\n"
             f"{answers_str}"
         )
         await bot.send_message(
@@ -166,8 +166,8 @@ async def handle_create_answers(callback: CallbackQuery, state: FSMContext):
 
         await callback.message.delete()
         await callback.message.answer(
-            "<b>✅ Ты заполнил(а) все ответы!</b>\n\n"
-            "<b>Вот как выглядит твой тест:</b>\n\n"
+            "<b>✅ Тест заполнен!</b>\n\n"
+            "<b>Вот как он выглядит:</b>\n\n"
             f"{answers_str}",
             reply_markup=accept_test_kb
         )
@@ -188,14 +188,14 @@ async def handle_callbacks_accept_test(callback: CallbackQuery, state: FSMContex
         await add_user(callback.from_user.id, ref_link, callback.from_user.full_name, callback.from_user.username, date)
         await update_after_test_creation(callback.from_user.id, test_answers)
         await callback.message.answer(
-            "✅ <b>Тест сохранён!</b>\n\n"
+            "<b>✅ Тест сохранён!</b>\n\n"
             "Теперь можешь отправлять ссылку друзьям и смотреть, насколько хорошо они тебя знают 🤝",
             reply_markup=get_send_link_kb(ref_link)
         )
     else:
         await callback.message.answer(
-            "❌ <b>Изменение теста отменено.</b>\n\n"
-            "Ты всегда можешь вернуться и создать или изменить тест позже 🙂"
+            "<b>❌ Сохранение отменено.</b>\n\n"
+            "Ты можешь вернуться и создать или изменить тест позже 🙂"
         )
 
     await callback.message.delete()
