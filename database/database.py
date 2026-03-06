@@ -252,6 +252,62 @@ async def get_last_hundred_users():
             return [record['username'] for record in records]
         return []
 
+async def get_tests_created_count():
+    async with pool.acquire() as connection:
+        # Count how many distinct tests have answers (i.e., authors created a test)
+        count = await connection.fetchval("SELECT COUNT(DISTINCT test_id) FROM tests_answers;")
+        return count or 0
+
+async def get_average_test_score():
+    async with pool.acquire() as connection:
+        avg = await connection.fetchval("SELECT AVG(score) FROM tests_results;")
+        if avg is None:
+            return 0.0
+        try:
+            return float(avg)
+        except Exception:
+            return 0.0
+
+async def get_most_common_answers_per_question(top_n: int = 1, max_questions: int = 10):
+    async with pool.acquire() as connection:
+        # Get counts grouped by question_index and answer
+        rows = await connection.fetch(
+            """
+            SELECT question_index, answer, COUNT(*) AS cnt
+            FROM tests_answers
+            GROUP BY question_index, answer
+            ORDER BY question_index ASC, cnt DESC
+            """
+        )
+
+        # Aggregate top_n answers per question
+        result = {}
+        for row in rows:
+            qidx = row['question_index']
+            if max_questions is not None and qidx >= max_questions:
+                continue
+            if qidx not in result:
+                result[qidx] = []
+            if len(result[qidx]) < top_n:
+                result[qidx].append((row['answer'], row['cnt']))
+
+        return result
+
+async def get_top_tests_by_takers(limit: int = 5):
+    async with pool.acquire() as connection:
+        rows = await connection.fetch(
+            """
+            SELECT t.id AS test_id, t.num_users_passed, u.username
+            FROM tests t
+            LEFT JOIN users u ON u.id = t.id
+            ORDER BY t.num_users_passed DESC
+            LIMIT $1
+            """,
+            limit
+        )
+
+        return [dict(row) for row in rows]
+
 async def close_db():
     if pool:
         await pool.close()
