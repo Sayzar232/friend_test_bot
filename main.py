@@ -3,10 +3,9 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from aiohttp import web
-import os
 import logging
 
-from settings import TOKEN, WEBHOOK_URL, WEBHOOK_PATH, WEBHOOK_SECRET
+from settings import TOKEN, WEBHOOK_URL, WEBHOOK_PATH, WEBHOOK_SECRET, PORT
 from handlers.user_handlers import router as user_router
 from handlers.callbacks_handlers import router as callbacks_router
 from handlers.answers_callbacks_handlers import router as answers_callbacks_router
@@ -89,12 +88,10 @@ def main():
     webhook_requests_handler.register(app, path=WEBHOOK_PATH)
     setup_application(app, dp, bot=bot)
     
-    # Получаем порт из переменной окружения
-    port = int(os.getenv("PORT", 10000))
-    logger.info(f"Запуск сервера на порту {port}")
+    logger.info(f"Запуск сервера на порту {PORT}")
     
     # Запускаем приложение
-    web.run_app(app, host="0.0.0.0", port=port)
+    web.run_app(app, host="0.0.0.0", port=PORT)
 
 if __name__ == "__main__":
     main()
