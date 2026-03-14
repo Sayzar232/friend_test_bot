@@ -182,3 +182,15 @@ def get_send_link_kb(link: str) -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text="Поделиться тестом", switch_inline_query=f"Насколько хорошо ты меня знаешь?\n\n{link}")],
         [InlineKeyboardButton(text="Назад в меню", callback_data="menu_info")]
     ])
+
+
+def get_create_test_reminder_kb() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Создать тест", callback_data="menu_create_test")]
+    ])
+
+
+def get_share_reminder_kb(link: str) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Поделиться", switch_inline_query=f"Насколько хорошо ты меня знаешь?\n\n{link}")]
+    ])

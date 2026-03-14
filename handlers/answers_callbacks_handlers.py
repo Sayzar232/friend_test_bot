@@ -7,12 +7,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 from aiogram.utils.deep_linking import create_start_link
 
-from database.database import (
-    add_user,
-    get_user_data,
-    update_after_test_completion,
-    update_after_test_creation,
-)
+from database.database import get_user_data, update_after_test_completion, update_after_test_creation
 from utils.keyboards import accept_test_kb, get_question_keyboard, get_send_link_kb
 from utils.questions import QUESTIONS, QUESTIONS_FOR_FRIEND
 from utils.states import Form
@@ -276,13 +271,6 @@ async def save_created_test(callback: CallbackQuery, bot: Bot, test_answers: lis
     ref_link = await create_start_link(bot, str(callback.from_user.id), encode=True)
     current_date = datetime.now().date()
 
-    await add_user(
-        callback.from_user.id,
-        ref_link,
-        callback.from_user.full_name,
-        callback.from_user.username,
-        current_date,
-    )
     await update_after_test_creation(callback.from_user.id, test_answers)
     await callback.message.answer(
         "<b>✅ Тест сохранён!</b>\n\n"
