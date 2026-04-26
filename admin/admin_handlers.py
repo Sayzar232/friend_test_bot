@@ -3,8 +3,9 @@ import logging
 from aiogram import Bot, F, Router, types
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery
+from aiogram.types import BufferedInputFile, CallbackQuery
 
+from admin.user_growth_chart import create_user_growth_chart
 from database.database import (
     get_all_user_ids,
     get_average_test_score,
@@ -135,6 +136,9 @@ async def handle_admin(message: types.Message):
 async def handle_admin_actions(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
+    if not is_admin(callback.from_user.id):
+        return
+
     action = callback.data.removeprefix("admin_")
 
     if action == "broadcast":
@@ -144,6 +148,23 @@ async def handle_admin_actions(callback: CallbackQuery, state: FSMContext):
 
     if action == "stats":
         await callback.message.answer(await build_stats_text(), parse_mode="HTML")
+        return
+
+    if action == "growth_chart":
+        try:
+            chart = await create_user_growth_chart()
+        except ValueError as exc:
+            await callback.message.answer(str(exc))
+            return
+        except Exception as exc:
+            logger.exception("Failed to build user growth chart: %s", exc)
+            await callback.message.answer("Не удалось построить график роста пользователей.")
+            return
+
+        await callback.message.answer_photo(
+            BufferedInputFile(chart.getvalue(), filename="user_growth.png"),
+            caption="График роста пользователей",
+        )
         return
 
     if action == "100_users":

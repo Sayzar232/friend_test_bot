@@ -7,42 +7,43 @@ from aiogram import Bot
 from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 from aiogram.types import InlineKeyboardMarkup
 
-from database.database import get_users_for_daily_reminders, mark_reminder_sent
+from database.database import get_users_for_weekly_reminders, mark_reminder_sent
 from utils.keyboards import get_create_test_reminder_kb, get_share_reminder_kb
 
 logger = logging.getLogger(__name__)
 
-REMINDER_AFTER = timedelta(days=2)
+REMINDER_AFTER = timedelta(days=7)
+REMINDER_REPEAT_AFTER = timedelta(days=7)
 CREATE_REMINDER_KIND = "create_test"
 SHARE_REMINDER_KIND = "share_test"
 
 CREATE_TEST_TEMPLATES = [
     (
         "create_1",
-        "<b>🖐 Пора создать свой тест</b>\n\nСоздай тест о себе, чтобы узнать какой у вас уровень дружбы.",
+        "Привет! Похоже, ты еще не создал свой тест.\n\nЕсли будет настроение, заполни его за пару минут - друзьям будет проще проверить, насколько хорошо они тебя знают.",
     ),
     (
         "create_2",
-        "<b>🤔 Проверь, кто знает тебя лучше всех</b>\n\nЗаполни свой тест.",
+        "Небольшое напоминание: твой личный тест пока пуст.\n\nМожно спокойно создать его сейчас, а потом отправить ссылку друзьям.",
     ),
     (
         "create_3",
-        "<b>😁 Тест на дружбу</b>\n\nСоздай свой тест, чтобы узнать кто лучше всего тебя знает.",
+        "Загляни, когда будет удобно: твой тест еще не создан.\n\nОтветь на вопросы, и бот соберет для тебя результаты друзей.",
     ),
 ]
 
 SHARE_TEST_TEMPLATES = [
     (
         "share_1",
-        "<b>🔗 Поделись своим тестом</b>\n\nТвой тест готов! Отправь его друзьям, чтобы узнать, кто из них знает тебя лучше всех.",
+        "Привет! Давно не было новой активности по тестам.\n\nМожешь отправить свою ссылку друзьям или пройти чей-нибудь тест, когда будет время.",
     ),
     (
         "share_2",
-        "<b>🤔 Давно не было результатов?</b>\n\nНапомни друзьям о своем тесте, чтобы получить новые ответы и узнать что-то интересное.",
+        "Небольшое дружеское напоминание: твой тест уже готов.\n\nЕсли хочешь обновить результаты, поделись ссылкой еще раз.",
     ),
     (
         "share_3",
-        "<b>🏆 Кто твой лучший друг?</b>\n\nПоделись тестом еще раз и проверь, как хорошо тебя знают твои друзья.",
+        "Кажется, тесты немного застоялись.\n\nМожно позвать друзей пройти твой тест или самому ответить на тест друга.",
     ),
 ]
 
@@ -86,8 +87,8 @@ def _select_template(kind: str, last_kind: str | None, last_template: str | None
     return random.choice(available_templates)
 
 
-def _same_day(sent_at: datetime | None, current_date: date) -> bool:
-    return bool(sent_at and sent_at.date() == current_date)
+def _recently_reminded(sent_at: datetime | None, now: datetime) -> bool:
+    return bool(sent_at and now - sent_at < REMINDER_REPEAT_AFTER)
 
 
 def _get_base_activity_time(candidate: ReminderCandidate, now: datetime) -> datetime:
@@ -119,6 +120,10 @@ def _build_share_payload(candidate: ReminderCandidate, now: datetime) -> tuple[s
 
 def _get_reminder_payload(candidate: ReminderCandidate, now: datetime) -> tuple[str, str, InlineKeyboardMarkup] | None:
     if not candidate.has_test:
+        base_activity_time = _get_base_activity_time(candidate, now)
+        if now - base_activity_time < REMINDER_AFTER:
+            return None
+
         template_id, text = _select_template(
             CREATE_REMINDER_KIND,
             candidate.last_reminder_kind,
@@ -129,13 +134,13 @@ def _get_reminder_payload(candidate: ReminderCandidate, now: datetime) -> tuple[
     return _build_share_payload(candidate, now)
 
 
-async def send_daily_reminders(bot: Bot) -> None:
+async def send_weekly_reminders(bot: Bot) -> None:
     now = datetime.now()
-    candidates_raw = await get_users_for_daily_reminders()
+    candidates_raw = await get_users_for_weekly_reminders()
 
     for raw_candidate in candidates_raw:
         candidate = _as_candidate(raw_candidate)
-        if _same_day(candidate.last_reminder_sent_at, now.date()):
+        if _recently_reminded(candidate.last_reminder_sent_at, now):
             continue
 
         reminder_payload = _get_reminder_payload(candidate, now)

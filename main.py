@@ -13,10 +13,11 @@ from admin.admin_handlers import router as admin_router
 from database.database import close_db, init_db
 from handlers.answers_callbacks_handlers import router as answers_callbacks_router
 from handlers.callbacks_handlers import router as callbacks_router
+from handlers.groups.group_handlers import router as group_router
 from handlers.message_handlers import router as states_router
 from handlers.user_handlers import router as user_router
-from settings import PORT, REMINDER_TIMEZONE, REMINDER_HOUR, REMINDER_MINUTE, TOKEN, WEBHOOK_PATH, WEBHOOK_SECRET, WEBHOOK_URL
-from utils.reminders import send_daily_reminders
+from settings import PORT, REMINDER_TIMEZONE, REMINDER_WEEKDAY, REMINDER_HOUR, REMINDER_MINUTE, TOKEN, WEBHOOK_PATH, WEBHOOK_SECRET, WEBHOOK_URL
+from utils.reminders import send_weekly_reminders
 
 logging.basicConfig(
     level=logging.INFO,
@@ -27,7 +28,7 @@ logger = logging.getLogger(__name__)
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
 
-dp.include_routers(user_router, callbacks_router, states_router, admin_router, answers_callbacks_router)
+dp.include_routers(group_router, user_router, callbacks_router, states_router, admin_router, answers_callbacks_router)
 
 
 async def on_startup(app):
@@ -41,15 +42,20 @@ async def on_startup(app):
 
         scheduler = AsyncIOScheduler(timezone=ZoneInfo(REMINDER_TIMEZONE))
         scheduler.add_job(
-            send_daily_reminders,
-            trigger=CronTrigger(hour=REMINDER_HOUR, minute=REMINDER_MINUTE, timezone=ZoneInfo(REMINDER_TIMEZONE)),
+            send_weekly_reminders,
+            trigger=CronTrigger(
+                day_of_week=REMINDER_WEEKDAY,
+                hour=REMINDER_HOUR,
+                minute=REMINDER_MINUTE,
+                timezone=ZoneInfo(REMINDER_TIMEZONE),
+            ),
             kwargs={"bot": bot},
-            id="daily-reminders",
+            id="weekly-reminders",
             replace_existing=True,
         )
         scheduler.start()
         app["scheduler"] = scheduler
-        logger.info("Планировщик напоминаний запущен: каждый день в 18:00 (%s)", REMINDER_TIMEZONE)
+        logger.info("Планировщик напоминаний запущен: раз в неделю в %02d:%02d (%s)", REMINDER_HOUR, REMINDER_MINUTE, REMINDER_TIMEZONE)
 
         await bot.delete_webhook(drop_pending_updates=True)
         logger.info("Старый webhook удален")

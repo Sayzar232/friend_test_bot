@@ -246,7 +246,16 @@ async def get_user_data(user_id):
         return data
 
 
-async def get_users_for_daily_reminders():
+async def get_user_id_by_username(username: str) -> int | None:
+    async with pool.acquire() as connection:
+        user_id = await connection.fetchval(
+            "SELECT id FROM users WHERE username ILIKE $1",
+            username,
+        )
+        return user_id
+
+
+async def get_users_for_weekly_reminders():
     async with pool.acquire() as connection:
         rows = await connection.fetch(
             """

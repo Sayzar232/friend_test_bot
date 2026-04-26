@@ -5,18 +5,18 @@ best_users_passed_kb = InlineKeyboardMarkup(inline_keyboard=[
 ])
 
 menu_kb = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="✏ Создать/изменить ответы на тест", callback_data="menu_create_test")],
+    [InlineKeyboardButton(text="📝 Создать мой тест", callback_data="menu_create_test")],
     [InlineKeyboardButton(text="ℹ Результаты тестов", callback_data="menu_info")],
     [InlineKeyboardButton(text="⁉ Помощь", callback_data="menu_help")]
 ])
 
 start_quetions_kb = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="Начать тест", callback_data="start_questions_start")],
+    [InlineKeyboardButton(text="🔥 Начать тест!", callback_data="start_questions_start")],
     [InlineKeyboardButton(text="Назад", callback_data="start_questions_back")]
 ])
 
 new_user_start_kb = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="Начать тест", callback_data="start_questions_start")]
+    [InlineKeyboardButton(text="🔥 Начать тест!", callback_data="start_questions_start")]
 ])
 
 back_to_menu_kb = InlineKeyboardMarkup(inline_keyboard=[
@@ -24,7 +24,7 @@ back_to_menu_kb = InlineKeyboardMarkup(inline_keyboard=[
 ])
 
 friend_kb = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="Начать тест", callback_data="friend_questions_start")],
+    [InlineKeyboardButton(text="🚀 Пройти тест друга", callback_data="friend_questions_start")],
     [InlineKeyboardButton(text="Отмена", callback_data="friend_questions_cancel")]
 ])
 
@@ -151,6 +151,7 @@ answer_15 = InlineKeyboardMarkup(inline_keyboard=[
 admin_kb = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="📢 Рассылка", callback_data="admin_broadcast")],
     [InlineKeyboardButton(text="📊 Статистика", callback_data="admin_stats")],
+    [InlineKeyboardButton(text="📈 Рост пользователей", callback_data="admin_growth_chart")],
     [InlineKeyboardButton(text="👥 Последние 100 пользователей", callback_data="admin_100_users")]
 ])
 
@@ -194,3 +195,29 @@ def get_share_reminder_kb(link: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="Поделиться", switch_inline_query=f"Насколько хорошо ты меня знаешь?\n\n{link}")]
     ])
+
+
+def get_group_start_kb(target_id: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Начать тест", callback_data=f"grp_start_{target_id}")],
+        [InlineKeyboardButton(text="Отмена", callback_data="grp_cancel")]
+    ])
+
+
+def get_group_question_keyboard(question_number: int) -> InlineKeyboardMarkup | None:
+    original_kb = get_question_keyboard(question_number)
+    if not original_kb:
+        return None
+    
+    new_inline_keyboard = []
+    for row in original_kb.inline_keyboard:
+        new_row = []
+        for btn in row:
+            if btn.callback_data and btn.callback_data.startswith("answer_"):
+                new_cb = btn.callback_data.replace("answer_", "grp_ans_", 1)
+                new_row.append(InlineKeyboardButton(text=btn.text, callback_data=new_cb))
+            else:
+                new_row.append(btn)
+        new_inline_keyboard.append(new_row)
+        
+    return InlineKeyboardMarkup(inline_keyboard=new_inline_keyboard)

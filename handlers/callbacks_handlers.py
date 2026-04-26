@@ -123,27 +123,28 @@ def build_info_text(user_info: dict, full_name: str, user_id: int) -> str:
         user_info.get("other_test_users_meta"),
     )
 
-    best_results_text = build_results_block(best_users_entries, "Пока никто не прошел твой тест.")
-    other_results_text = build_results_block(other_test_entries, "Ты пока не проходил тесты друзей.")
+    best_results_text = build_results_block(best_users_entries, "Пока никто не прошел твой тест 😢")
+    other_results_text = build_results_block(other_test_entries, "Ты пока не проходил тесты друзей 🤷‍♂️")
     compatibility_text = build_compatibility_block(other_test_entries)
     link_text = (
         user_info.get("ref_link")
         if user_info.get("test_answers")
-        else "Будет доступна после создания теста."
+        else "Будет доступна после создания теста 📝"
     )
 
     return (
-        "<b>Твой профиль</b>\n\n"
+        "<b>👤 Твой профиль (Дашборд)</b>\n\n"
         f"<b>Имя:</b> <code>{full_name}</code>\n"
         f"<b>ID:</b> <code>{user_id}</code>\n\n"
-        f"<b>Пройденных тестов:</b> {user_info.get('other_test_passed') or 0}\n"
-        f"<b>Людей, которые прошли твой тест:</b> {user_info.get('num_users_passed') or 0}\n\n"
-        f"<b>Твоя ссылка на тест:</b>\n{link_text}\n\n"
-        "<b>Лучшие результаты по твоему тесту:</b>\n\n"
+        f"<b>✅ Пройденных тестов друга:</b> {user_info.get('other_test_passed') or 0}\n"
+        f"<b>👥 Людей, прошедших твой тест:</b> {user_info.get('num_users_passed') or 0}\n\n"
+        "<b>🔗 Твоя персональная ссылка:</b>\n"
+        f"{link_text}\n\n"
+        "<b>🏆 Топ результатов твоих друзей:</b>\n"
         f"{best_results_text}\n\n"
-        "<b>Твои результаты в тестах друзей:</b>\n\n"
+        "<b>🎯 Твои рекорды в тестах друзей:</b>\n"
         f"{other_results_text}\n\n"
-        "<b>Совместимость с друзьями:</b>\n\n"
+        "<b>💞 Совместимость:</b>\n"
         f"{compatibility_text}"
     )
 
@@ -151,17 +152,17 @@ def build_info_text(user_info: dict, full_name: str, user_id: int) -> str:
 def build_help_text() -> str:
     return (
         "<b>ℹ️ Как пользоваться ботом?</b>\n\n"
-        "Этот бот позволяет вам создать свой собственный тест и поделиться им с друзьями, чтобы узнать, насколько хорошо они вас знают!\n\n"
+        "Этот бот — идеальный способ узнать, кто из друзей знает тебя лучше всех!\n\n"
         "<b>📋 Пошаговая инструкция:</b>\n\n"
-        "1. <b>Создайте тест:</b> Нажмите \"Создать/изменить тест\" в главном меню или используйте команду <code>/edit_test</code> и ответьте на вопросы.\n"
-        "2. <b>Получите ссылку:</b> Ваша персональная ссылка для друзей будет доступна в профиле (<code>/profile</code>).\n"
-        "3. <b>Отправьте друзьям:</b> 📤 Поделитесь ссылкой с друзьями.\n"
-        "4. <b>Следите за результатами:</b> Вы получите уведомление, когда кто-то пройдет ваш тест. Лучшие результаты можно посмотреть в профиле.\n\n"
+        "1. <b>📝 Создайте личный тест:</b> Нажми «Создать мой тест» в главном меню или введи <code>/edit_test</code>.\n"
+        "2. <b>🔗 Получите ссылку:</b> Она появится в твоём профиле (<code>/profile</code>).\n"
+        "3. <b>📤 Отправьте ссылку:</b> Кинь её в чат к друзьям и смотри, как они отвечают на вопросы.\n"
+        "4. <b>📊 Собирайте стату:</b> Мы уведомим тебя, когда кто-то пройдет тест. Результаты сохраняются в профиле!\n\n"
         "<b>🤖 Доступные команды:</b>\n\n"
-        "<code>/start</code> - 🚀 Запустить бота и получить свою персональную ссылку.\n"
-        "<code>/profile</code> - 👤 Посмотреть свой профиль, статистику и ссылку на тест.\n"
-        "<code>/edit_test</code> - ✏️ Создать или изменить свои ответы на тест.\n"
-        "<code>/show_answers</code> - 👀 Посмотреть свои текущие ответы на тест."
+        "<code>/start</code> - 🚀 Обновить бота и главное меню.\n"
+        "<code>/profile</code> - 👤 Твой дашборд с результатами.\n"
+        "<code>/edit_test</code> - ✏️ Пересоздать или изменить свои ответы на тест.\n"
+        "<code>/show_answers</code> - 👀 Вспомнить свои правильные ответы."
     )
 
 
@@ -180,8 +181,8 @@ def build_default_user_info() -> dict[str, Any]:
 
 def build_main_menu_text(user_has_test: bool) -> str:
     if user_has_test:
-        return "<b>Главное меню</b>\n\nВыбери, что хочешь сделать дальше."
-    return "<b>Главное меню</b>\n\nМожешь пользоваться ботом сразу или создать свой тест позже."
+        return "<b>🏠 Главное меню</b>\n\nВыбери, что хочешь сделать дальше."
+    return "<b>🏠 Главное меню</b>\n\nМожешь пользоваться ботом сразу или создать свой тест позже."
 
 
 async def start_questionnaire(
@@ -200,6 +201,9 @@ async def start_questionnaire(
     )
     await state.set_state(next_state)
 
+    if test_type == "create":
+        await callback.message.edit_text(text="<b>⭐️ Отлично, давай начнём.\n Ответь на 15 вопросов ниже, используя кнопки 👇. </b>")
+
     answer_method = callback.message.edit_text if edit_current_message else callback.message.answer
     await answer_method(
         f"<b>Вопрос 1 из {TOTAL_QUESTIONS}</b>\n\n{question_text}",
@@ -208,16 +212,19 @@ async def start_questionnaire(
 
 
 @router.callback_query(F.data.startswith("menu_"))
-async def handle_menu(callback: CallbackQuery):
+async def handle_menu(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
     action = callback.data.removeprefix("menu_")
 
     if action == "create_test":
-        await callback.message.edit_text(
-            "<b>Создавай или изменяй свой тест!</b>\n\n"
-            "Буду отправлять вопросы по одному. Отвечай честно.",
-            reply_markup=start_quetions_kb,
+        await start_questionnaire(
+            callback,
+            state,
+            test_type="create",
+            question_text=QUESTIONS[0],
+            next_state=Form.waiting_for_answer,
+            edit_current_message=False,
         )
         return
 

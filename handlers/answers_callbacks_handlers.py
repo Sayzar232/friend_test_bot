@@ -250,7 +250,9 @@ async def finish_friend_test(
         "<b>✅ Тест пройден!</b>\n\n"
         f"Правильных ответов: <b>{right_answers}/15</b> 🎯\n\n"
         "<b>Твои ответы:</b>\n\n"
-        f"{answers_text}"
+        f"{answers_text}\n\n"
+        "<b>А теперь твоя очередь! 😎</b>\n"
+        "Узнай, насколько хорошо этот друг знает ТЕБЯ. Создай свой тест в главном меню!"
     )
     await notify_test_owner(bot, friend_id, callback, user_data, right_answers)
     await state.clear()
