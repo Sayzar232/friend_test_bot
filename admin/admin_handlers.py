@@ -3,7 +3,7 @@ import logging
 from aiogram import Bot, F, Router, types
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import BufferedInputFile, CallbackQuery
+from aiogram.types import BufferedInputFile, CallbackQuery, InlineKeyboardMarkup
 
 from admin.user_growth_chart import create_user_growth_chart
 from database.database import (
@@ -17,7 +17,7 @@ from database.database import (
     get_user_count,
 )
 from settings import ADMIN_ID
-from utils.keyboards import admin_kb
+from utils.keyboards import admin_kb, get_url_button_kb
 from utils.states import Form
 
 router = Router()
@@ -107,11 +107,11 @@ def build_recent_users_text(users: list[str]) -> str:
     return f"<b>👥 Последние 100 пользователей:</b>\n\n{users_block}"
 
 
-async def send_broadcast(bot: Bot, user_ids: list[int], text: str) -> int:
+async def send_broadcast(bot: Bot, user_ids: list[int], url_kb: InlineKeyboardMarkup | None, text: str) -> int:
     sent_count = 0
     for user_id in user_ids:
         try:
-            await bot.send_message(user_id, text)
+            await bot.send_message(user_id, text, parse_mode="HTML", reply_markup=url_kb)
             sent_count += 1
         except Exception as exc:
             logger.warning("Failed to send broadcast to user %s: %s", user_id, exc)
@@ -143,7 +143,7 @@ async def handle_admin_actions(callback: CallbackQuery, state: FSMContext):
 
     if action == "broadcast":
         await callback.message.answer("Введите сообщение для рассылки:")
-        await state.set_state(Form.waiting_for_broadcast_message)
+        await state.set_state(Form.waiting_for_url_button_broadcast)
         return
 
     if action == "stats":
@@ -172,10 +172,31 @@ async def handle_admin_actions(callback: CallbackQuery, state: FSMContext):
         await callback.message.answer(build_recent_users_text(users))
 
 
+@router.message(Form.waiting_for_url_button_broadcast)
+async def handle_url_button_broadcast(message: types.Message, bot: Bot, state: FSMContext):
+    await message.answer("Введите url для кнопки и текст через пробел или введите 'no', если кнопки нет:")
+    await state.set_state(Form.waiting_for_broadcast_message)
+    await state.update_data(broadcast_text=message.text)
+
+
 @router.message(F.text, Form.waiting_for_broadcast_message)
 async def handle_broadcast_message(message: types.Message, bot: Bot, state: FSMContext):
+    data = await state.get_data()
+    broadcast_text = data.get("broadcast_text")
+
+    if message.text.lower() == "no":
+        url_kb = None
+    else:
+        try:
+            url, button_text = message.text.split(maxsplit=1)
+        except ValueError:
+            await message.answer("Неверный формат. Введите URL и текст кнопки через пробел, или 'no' для без кнопки.")
+            return
+
+        url_kb = get_url_button_kb(url, button_text)
+
     user_ids = await get_all_user_ids()
-    sent_count = await send_broadcast(bot, user_ids, message.text)
+    sent_count = await send_broadcast(bot, user_ids, url_kb, broadcast_text)
 
     await message.answer(f"Рассылка завершена. Отправлено {sent_count} сообщений.")
     await state.clear()

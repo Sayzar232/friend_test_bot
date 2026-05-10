@@ -221,3 +221,9 @@ def get_group_question_keyboard(question_number: int) -> InlineKeyboardMarkup | 
         new_inline_keyboard.append(new_row)
         
     return InlineKeyboardMarkup(inline_keyboard=new_inline_keyboard)
+
+
+def get_url_button_kb(url: str, button_text: str) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=button_text, url=url)]
+    ])
