@@ -1,14 +1,17 @@
 from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
 
-from handlers.answers_callbacks_handlers import (
+from .answers_callbacks_handlers import (
     build_feedback_question_text,
     build_question_text,
     ensure_correct_answers,
 )
-from utils.keyboards import get_question_keyboard
-from utils.questions import QUESTIONS, QUESTIONS_FOR_FRIEND
-from utils.states import Form
+from utils import (
+    QUESTIONS,
+    QUESTIONS_FOR_FRIEND,
+    get_question_keyboard,
+    Form
+)
 
 router = Router()
 

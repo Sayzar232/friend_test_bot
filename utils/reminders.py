@@ -7,7 +7,7 @@ from aiogram import Bot
 from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 from aiogram.types import InlineKeyboardMarkup
 
-from database.database import get_users_for_weekly_reminders, mark_reminder_sent
+from database import get_users_for_weekly_reminders, mark_reminder_sent
 from utils.keyboards import get_create_test_reminder_kb, get_share_reminder_kb
 
 logger = logging.getLogger(__name__)

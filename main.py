@@ -9,15 +9,27 @@ from aiohttp import web
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-from admin.admin_handlers import router as admin_router
-from database.database import close_db, init_db
-from handlers.answers_callbacks_handlers import router as answers_callbacks_router
-from handlers.callbacks_handlers import router as callbacks_router
-from handlers.groups.group_handlers import router as group_router
-from handlers.message_handlers import router as states_router
-from handlers.user_handlers import router as user_router
-from settings import PORT, REMINDER_TIMEZONE, REMINDER_WEEKDAY, REMINDER_HOUR, REMINDER_MINUTE, TOKEN, WEBHOOK_PATH, WEBHOOK_SECRET, WEBHOOK_URL
-from utils.reminders import send_weekly_reminders
+from admin import admin_router
+from database import close_db, init_db
+from handlers import (
+    answers_callbacks_router,
+    callbacks_router,
+    group_router,
+    states_router,
+    user_router
+)
+from settings import (
+    PORT,
+    REMINDER_TIMEZONE,
+    REMINDER_WEEKDAY,
+    REMINDER_HOUR,
+    REMINDER_MINUTE,
+    TOKEN,
+    WEBHOOK_PATH,
+    WEBHOOK_SECRET,
+    WEBHOOK_URL
+)
+from utils import send_weekly_reminders
 
 logging.basicConfig(
     level=logging.INFO,

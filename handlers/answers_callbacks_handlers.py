@@ -7,10 +7,19 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 from aiogram.utils.deep_linking import create_start_link
 
-from database.database import get_user_data, update_after_test_completion, update_after_test_creation
-from utils.keyboards import accept_test_kb, get_question_keyboard, get_send_link_kb
-from utils.questions import QUESTIONS, QUESTIONS_FOR_FRIEND
-from utils.states import Form
+from database import (
+    get_user_data,
+    update_after_test_completion,
+    update_after_test_creation
+)
+from utils import (
+    accept_test_kb,
+    get_question_keyboard,
+    get_send_link_kb,
+    QUESTIONS, 
+    QUESTIONS_FOR_FRIEND,
+    Form
+)
 
 router = Router()
 

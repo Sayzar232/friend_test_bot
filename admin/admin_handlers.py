@@ -5,8 +5,8 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import BufferedInputFile, CallbackQuery, InlineKeyboardMarkup
 
-from admin.user_growth_chart import create_user_growth_chart
-from database.database import (
+from .user_growth_chart import create_user_growth_chart
+from database import (
     get_all_user_ids,
     get_average_test_score,
     get_last_hundred_users,
@@ -17,8 +17,11 @@ from database.database import (
     get_user_count,
 )
 from settings import ADMIN_ID
-from utils.keyboards import admin_kb, get_url_button_kb
-from utils.states import Form
+from utils import (
+    admin_kb,
+    get_url_button_kb,
+    Form
+)
 
 router = Router()
 

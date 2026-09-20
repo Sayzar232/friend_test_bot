@@ -5,10 +5,10 @@ from aiogram.filters import Command, CommandObject, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.deep_linking import create_start_link, decode_payload
 
-from database.database import add_user, get_user_data
-from handlers.callbacks_handlers import get_test_str
+from database import add_user, get_user_data
+from .callbacks_handlers import get_test_str
 from settings import ADMIN_ID
-from utils.keyboards import (
+from utils import (
     best_users_passed_kb,
     friend_kb,
     menu_kb,

@@ -5,17 +5,18 @@ from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
-from database.database import get_user_data
-from utils.keyboards import (
+from database import get_user_data
+from utils import (
     back_to_menu_kb,
     best_users_passed_kb,
     friend_kb,
     get_question_keyboard,
     menu_kb,
     start_quetions_kb,
+    QUESTIONS,
+    QUESTIONS_FOR_FRIEND,
+    Form
 )
-from utils.questions import QUESTIONS, QUESTIONS_FOR_FRIEND
-from utils.states import Form
 
 router = Router()
 

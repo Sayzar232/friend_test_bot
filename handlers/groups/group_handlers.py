@@ -3,8 +3,12 @@ from aiogram import Bot, F, Router, types
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
-from database.database import get_user_data, get_user_id_by_username, update_after_test_completion
-from handlers.answers_callbacks_handlers import (
+from database import (
+    get_user_data,
+    get_user_id_by_username,
+    update_after_test_completion
+)
+from ..answers_callbacks_handlers import (
     build_feedback_question_text,
     build_question_text,
     calculate_right_answers,
@@ -13,8 +17,11 @@ from handlers.answers_callbacks_handlers import (
     notify_test_owner,
     TOTAL_QUESTIONS,
 )
-from utils.keyboards import get_group_question_keyboard, get_group_start_kb
-from utils.questions import QUESTIONS_FOR_FRIEND
+from utils import (
+    get_group_question_keyboard,
+    get_group_start_kb,
+    QUESTIONS_FOR_FRIEND
+)
 
 router = Router()
 router.message.filter(F.chat.type.in_({"group", "supergroup"}))
