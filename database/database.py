@@ -6,13 +6,13 @@ from settings import DATABASE_URL
 class Database:
     def __init__(
             self,
-            dsn: str = None,
+            dsn: str | None = None,
             min_size: int = 1,
             max_size: int = 10,
             command_timeout: int = 60
         ):
         self._dsn = dsn if dsn is not None else DATABASE_URL
-        self._min_size = min_size,
+        self._min_size = min_size
         self._max_size = max_size
         self._command_timeout = command_timeout
         self.pool = None
@@ -405,3 +405,5 @@ class Database:
             )
 
             return [dict(row) for row in rows]
+
+db = Database()

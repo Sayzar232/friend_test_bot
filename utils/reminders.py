@@ -7,7 +7,7 @@ from aiogram import Bot
 from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 from aiogram.types import InlineKeyboardMarkup
 
-from database import get_users_for_weekly_reminders, mark_reminder_sent
+from database import db
 from .keyboards import get_create_test_reminder_kb, get_share_reminder_kb
 
 logger = logging.getLogger(__name__)
@@ -136,7 +136,7 @@ def _get_reminder_payload(candidate: ReminderCandidate, now: datetime) -> tuple[
 
 async def send_weekly_reminders(bot: Bot) -> None:
     now = datetime.now()
-    candidates_raw = await get_users_for_weekly_reminders()
+    candidates_raw = await db.get_users_for_weekly_reminders()
 
     for raw_candidate in candidates_raw:
         candidate = _as_candidate(raw_candidate)
@@ -156,7 +156,7 @@ async def send_weekly_reminders(bot: Bot) -> None:
                 text=text,
                 reply_markup=reply_markup,
             )
-            await mark_reminder_sent(candidate.user_id, kind, template_id)
+            await db.mark_reminder_sent(candidate.user_id, kind, template_id)
         except (TelegramForbiddenError, TelegramBadRequest):
             logger.warning("Не удалось отправить напоминание пользователю %s", candidate.user_id)
         except Exception:

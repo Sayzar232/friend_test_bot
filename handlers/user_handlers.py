@@ -5,7 +5,7 @@ from aiogram.filters import Command, CommandObject, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.deep_linking import create_start_link, decode_payload
 
-from database import add_user, get_user_data
+from database import db
 from .callbacks_handlers import get_test_str
 from settings import ADMIN_ID
 from utils import (
@@ -72,14 +72,14 @@ async def ensure_user_exists(message: types.Message, bot: Bot) -> tuple[str, dic
     start_link = await create_start_link(bot, str(message.from_user.id), encode=True)
     current_date = datetime.now().date()
 
-    await add_user(
+    await db.add_user(
         message.from_user.id,
         start_link,
         message.from_user.full_name,
         message.from_user.username,
         current_date,
     )
-    user_data = await get_user_data(message.from_user.id)
+    user_data = await db.get_user_data(message.from_user.id)
     return start_link, user_data
 
 
@@ -133,7 +133,7 @@ async def process_start_payload(message: types.Message, state: FSMContext, paylo
         return
 
     friend_id = int(payload)
-    friend_data = await get_user_data(friend_id) or {"test_answers": []}
+    friend_data = await db.get_user_data(friend_id) or {"test_answers": []}
     users_cant_again = friend_data.get("users_cant_again") or []
 
     if message.from_user.id in users_cant_again:
@@ -175,7 +175,7 @@ async def handle_start(message: types.Message, bot: Bot, command: CommandObject,
 
 @router.message(Command("profile"))
 async def handle_profile(message: types.Message):
-    user_info = await get_user_data(message.from_user.id) or {}
+    user_info = await db.get_user_data(message.from_user.id) or {}
     await message.answer(
         text=build_profile_text(user_info, message.from_user.full_name, message.from_user.id),
         reply_markup=best_users_passed_kb,
@@ -193,7 +193,7 @@ async def handle_edit_test(message: types.Message):
 
 @router.message(Command("show_answers"))
 async def handle_show_answers(message: types.Message):
-    user_data = await get_user_data(message.from_user.id) or {}
+    user_data = await db.get_user_data(message.from_user.id) or {}
     answers_text = get_test_str(user_data.get("test_answers"))
 
     await message.answer(

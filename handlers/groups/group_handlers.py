@@ -3,11 +3,7 @@ from aiogram import Bot, F, Router, types
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
-from database import (
-    get_user_data,
-    get_user_id_by_username,
-    update_after_test_completion
-)
+from database import db
 from ..answers_callbacks_handlers import (
     build_feedback_question_text,
     build_question_text,
@@ -43,7 +39,7 @@ def get_friendship_level(score: int) -> str:
 async def handle_group_test_command(message: types.Message, match: re.Match):
     username = match.group(1)
     
-    friend_id = await get_user_id_by_username(username)
+    friend_id = await db.get_user_id_by_username(username)
     if not friend_id:
         await message.answer(f"Пользователь @{username} не найден в базе бота.")
         return
@@ -52,7 +48,7 @@ async def handle_group_test_command(message: types.Message, match: re.Match):
         await message.answer("Ты не можешь проходить свой собственный тест!")
         return
     
-    friend_data = await get_user_data(friend_id)
+    friend_data = await db.get_user_data(friend_id)
     if not friend_data or not friend_data.get("test_answers"):
         await message.answer(f"У пользователя @{username} еще нет заполненного теста.")
         return
@@ -87,7 +83,7 @@ async def handle_grp_start(callback: CallbackQuery, state: FSMContext):
         await callback.answer("Ты не можешь проходить свой собственный тест!", show_alert=True)
         return
 
-    friend_data = await get_user_data(friend_id)
+    friend_data = await db.get_user_data(friend_id)
     if not friend_data or not friend_data.get("test_answers"):
         await callback.answer("У этого пользователя нет заполненного теста.", show_alert=True)
         return
@@ -147,7 +143,7 @@ async def handle_grp_ans(callback: CallbackQuery, state: FSMContext, bot: Bot):
     test_answers[current_question_number - 1] = answer
     
     friend_id = state_data.get("test_id")
-    friend_data = await get_user_data(friend_id)
+    friend_data = await db.get_user_data(friend_id)
     correct_answers = friend_data.get("test_answers") if friend_data else []
     correct_answer = get_answer_by_index(correct_answers, current_question_number)
     
@@ -173,7 +169,7 @@ async def handle_grp_ans(callback: CallbackQuery, state: FSMContext, bot: Bot):
         right_answers = calculate_right_answers(test_answers, correct_answers)
         friendship_level = get_friendship_level(right_answers)
         
-        user_data = await get_user_data(callback.from_user.id)
+        user_data = await db.get_user_data(callback.from_user.id)
         # Если юзера нет в БД бота, то user_data вернет пустую структуру с нулями, это нормально
         
         await callback.message.edit_text(
@@ -192,7 +188,7 @@ async def handle_grp_ans(callback: CallbackQuery, state: FSMContext, bot: Bot):
         other_test_users[friend_data.get("username") or str(friend_id)] = right_answers
         users_cant_again.append(callback.from_user.id)
         
-        await update_after_test_completion(
+        await db.update_after_test_completion(
             test_id=friend_id,
             num_users_passed=(friend_data.get("num_users_passed") or 0) + 1,
             best_users_passed=best_users_passed,

@@ -7,11 +7,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 from aiogram.utils.deep_linking import create_start_link
 
-from database import (
-    get_user_data,
-    update_after_test_completion,
-    update_after_test_creation
-)
+from database import db
 from utils import (
     accept_test_kb,
     get_question_keyboard,
@@ -125,7 +121,7 @@ async def ensure_correct_answers(state: FSMContext, state_data: dict) -> list:
     if not friend_id:
         return []
 
-    friend_data = await get_user_data(friend_id)
+    friend_data = await db.get_user_data(friend_id)
     correct_answers = friend_data.get("test_answers") if friend_data else []
     await state.update_data(correct_answers=correct_answers or [])
     return correct_answers or []
@@ -177,8 +173,8 @@ async def load_friend_test_context(
     if not friend_id:
         return None, None, None
 
-    friend_data = await get_user_data(friend_id)
-    user_data = await get_user_data(callback.from_user.id)
+    friend_data = await db.get_user_data(friend_id)
+    user_data = await db.get_user_data(callback.from_user.id)
     return friend_id, friend_data, user_data
 
 
@@ -266,7 +262,7 @@ async def finish_friend_test(
     await notify_test_owner(bot, friend_id, callback, user_data, right_answers)
     await state.clear()
 
-    await update_after_test_completion(
+    await db.update_after_test_completion(
         test_id=friend_id,
         num_users_passed=completion_payload["num_users_passed"],
         best_users_passed=completion_payload["best_users_passed"],
@@ -282,7 +278,7 @@ async def save_created_test(callback: CallbackQuery, bot: Bot, test_answers: lis
     ref_link = await create_start_link(bot, str(callback.from_user.id), encode=True)
     current_date = datetime.now().date()
 
-    await update_after_test_creation(callback.from_user.id, test_answers)
+    await db.update_after_test_creation(callback.from_user.id, test_answers)
     await callback.message.answer(
         "<b>✅ Тест сохранён!</b>\n\n"
         "Теперь можешь отправлять ссылку друзьям и смотреть, насколько хорошо они тебя знают 🤝",

@@ -5,7 +5,7 @@ from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
-from database import get_user_data
+from database import db
 from utils import (
     back_to_menu_kb,
     best_users_passed_kb,
@@ -230,7 +230,7 @@ async def handle_menu(callback: CallbackQuery, state: FSMContext):
         return
 
     if action == "info":
-        user_info = await get_user_data(callback.from_user.id) or build_default_user_info()
+        user_info = await db.get_user_data(callback.from_user.id) or build_default_user_info()
         await callback.message.answer(
             text=build_info_text(user_info, callback.from_user.full_name, callback.from_user.id),
             reply_markup=best_users_passed_kb,
@@ -245,7 +245,7 @@ async def handle_menu(callback: CallbackQuery, state: FSMContext):
 async def handle_show_users_passed(callback: CallbackQuery):
     await callback.answer()
 
-    user_info = await get_user_data(callback.from_user.id) or {"test_answers": []}
+    user_info = await db.get_user_data(callback.from_user.id) or {"test_answers": []}
     test_answers = get_test_str(user_info.get("test_answers"))
     if not test_answers:
         await callback.message.answer("<b>У тебя пока нет сохраненных ответов на тест.</b>")
@@ -272,7 +272,7 @@ async def handle_start_question(callback: CallbackQuery, state: FSMContext):
         return
 
     if action == "back":
-        user_data = await get_user_data(callback.from_user.id) or {"test_answers": []}
+        user_data = await db.get_user_data(callback.from_user.id) or {"test_answers": []}
         await callback.message.edit_text(
             build_main_menu_text(bool(user_data.get("test_answers"))),
             reply_markup=menu_kb,

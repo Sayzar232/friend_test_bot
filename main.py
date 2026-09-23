@@ -10,7 +10,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 
 from admin import admin_router
-from database import close_db, init_db
+from database import db, apply_migrations
 from handlers import (
     answers_callbacks_router,
     callbacks_router,
@@ -45,11 +45,9 @@ dp.include_routers(group_router, user_router, callbacks_router, states_router, a
 
 async def on_startup(app):
     try:
-        await init_db()
-        import database.database as db
-        import database.migrations as migrations
+        await db.initialize()
 
-        await migrations.apply_migrations(db.pool)
+        await apply_migrations(db.pool)
         logger.info("База данных инициализирована")
 
         scheduler = AsyncIOScheduler(timezone=ZoneInfo(REMINDER_TIMEZONE))
@@ -94,7 +92,7 @@ async def on_shutdown(app):
             scheduler.shutdown(wait=False)
             logger.info("Планировщик напоминаний остановлен")
 
-        await close_db()
+        await db.close()
         logger.info("База данных закрыта")
     except Exception as e:
         logger.error("Ошибка при shutdown: %s", e, exc_info=True)

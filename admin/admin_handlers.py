@@ -6,16 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import BufferedInputFile, CallbackQuery, InlineKeyboardMarkup
 
 from .user_growth_chart import create_user_growth_chart
-from database import (
-    get_all_user_ids,
-    get_average_test_score,
-    get_last_hundred_users,
-    get_most_common_answers_per_question,
-    get_tests_created_count,
-    get_top_tests_by_takers,
-    get_total_tests_passed,
-    get_user_count,
-)
+from database import db
 from settings import ADMIN_ID
 from utils import (
     admin_kb,
@@ -75,12 +66,12 @@ def build_top_tests_block(top_tests: list[dict]) -> list[str]:
 
 
 async def build_stats_text() -> str:
-    user_count = await get_user_count()
-    total_tests = await get_total_tests_passed()
-    tests_created = await get_tests_created_count()
-    average_score = await get_average_test_score()
-    common_answers = await get_most_common_answers_per_question(top_n=1, max_questions=10)
-    top_tests = await get_top_tests_by_takers(limit=5)
+    user_count = await db.get_user_count()
+    total_tests = await db.get_total_tests_passed()
+    tests_created = await db.get_tests_created_count()
+    average_score = await db.get_average_test_score()
+    common_answers = await db.get_most_common_answers_per_question(top_n=1, max_questions=10)
+    top_tests = await db.get_top_tests_by_takers(limit=5)
     users_with_results = await get_users_with_results_count()
 
     lines = [
@@ -126,8 +117,8 @@ async def handle_admin(message: types.Message):
     if not is_admin(message.from_user.id):
         return
 
-    user_count = await get_user_count()
-    total_tests = await get_total_tests_passed()
+    user_count = await db.get_user_count()
+    total_tests = await db.get_total_tests_passed()
 
     await message.answer(
         build_admin_panel_text(user_count, total_tests),
@@ -171,7 +162,7 @@ async def handle_admin_actions(callback: CallbackQuery, state: FSMContext):
         return
 
     if action == "100_users":
-        users = await get_last_hundred_users()
+        users = await db.get_last_hundred_users()
         await callback.message.answer(build_recent_users_text(users))
 
 
@@ -198,7 +189,7 @@ async def handle_broadcast_message(message: types.Message, bot: Bot, state: FSMC
 
         url_kb = get_url_button_kb(url, button_text)
 
-    user_ids = await get_all_user_ids()
+    user_ids = await db.get_all_user_ids()
     sent_count = await send_broadcast(bot, user_ids, url_kb, broadcast_text)
 
     await message.answer(f"Рассылка завершена. Отправлено {sent_count} сообщений.")
