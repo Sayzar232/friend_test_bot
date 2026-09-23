@@ -16,5 +16,6 @@ from .keyboards import (
     get_url_button_kb
 )
 from .questions import QUESTIONS, QUESTIONS_FOR_FRIEND
-from reminders import send_weekly_reminders
-from states import Form
+from .answers import ANSWERS, get_answers
+from .reminders import send_weekly_reminders
+from .states import Form
